@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() {}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -54,7 +52,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -101,13 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+          children: <Widget>[
             const Text(
               'Welcome to my shop!',
               style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.purple,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
               ),
             ),
           ],
