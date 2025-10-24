@@ -14,7 +14,7 @@ class App extends StatelessWidget {
         appBar: AppBar(title: const Text('Sandwich Counter')),
         body: Center(
           child: Container(
-            color: Colors.red,
+            color: Colors.blue,
             width: 350,
             height: 350,
             alignment: Alignment.center,
