@@ -28,6 +28,9 @@ class OrderScreen extends StatefulWidget {
 class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 0;
 
+  // Currently selected sandwich size (single-selection via Set).
+  final Set<String> _selectedSize = <String>{'Footlong'};
+
   // Controller for the order note input.
   final TextEditingController _noteController = TextEditingController();
 
@@ -59,10 +62,33 @@ class _OrderScreenState extends State<OrderScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            // Segmented control to switch sandwich size.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: SegmentedButton<String>(
+                segments: const <ButtonSegment<String>>[
+                  ButtonSegment<String>(
+                      value: 'Footlong', label: Text('Footlong')),
+                  ButtonSegment<String>(
+                      value: 'Six-inch', label: Text('Six-inch')),
+                ],
+                selected: _selectedSize,
+                onSelectionChanged: (Set<String> newSelection) {
+                  setState(() {
+                    // Keep only the single selection.
+                    _selectedSize
+                      ..clear()
+                      ..addAll(newSelection);
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
             // Show the item display including the current note.
             OrderItemDisplay(
               _quantity,
-              'Footlong',
+              // Use the currently selected size.
+              _selectedSize.isNotEmpty ? _selectedSize.first : 'Footlong',
               note: _noteController.text,
             ),
             const SizedBox(height: 12),
