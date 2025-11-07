@@ -106,7 +106,7 @@ class _OrderScreenState extends State<OrderScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: DropdownButtonFormField<BreadType>(
-                value: _selectedBread,
+                initialValue: _selectedBread,
                 decoration: const InputDecoration(
                   labelText: 'Bread type',
                   border: OutlineInputBorder(),

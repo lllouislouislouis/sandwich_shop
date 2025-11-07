@@ -11,20 +11,90 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sandwich_shop/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('Initial UI shows quantity, size and bread',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const App());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Initial quantity and size text.
+    expect(find.text('0 Footlong sandwich(es): '), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Bread defaults to White.
+    expect(find.text('Bread: White'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Add and Remove buttons present.
+    expect(find.widgetWithText(ElevatedButton, 'Add'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Remove'), findsOneWidget);
+  });
+
+  testWidgets('Add and Remove update quantity and icons',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+
+    // Tap Add once.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.pumpAndSettle();
+
+    // Expect one sandwich displayed.
+    expect(find.text('1 Footlong sandwich(es): 🥪'), findsOneWidget);
+
+    // Tap Add again.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.pumpAndSettle();
+    expect(find.text('2 Footlong sandwich(es): 🥪🥪'), findsOneWidget);
+
+    // Tap Remove once.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Remove'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 Footlong sandwich(es): 🥪'), findsOneWidget);
+  });
+
+  testWidgets('Entering a note displays it in the OrderItemDisplay',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+
+    // Enter a note.
+    final Finder noteField = find.byType(TextField);
+    expect(noteField, findsOneWidget);
+    await tester.enterText(noteField, 'no onions');
+    await tester.pumpAndSettle();
+
+    // Notes should be visible.
+    expect(find.text('Notes: no onions'), findsOneWidget);
+  });
+
+  testWidgets('Selecting a different bread updates the display',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+
+    // Open the dropdown by tapping the current value ('White').
+    await tester.tap(find.text('White'));
+    await tester.pumpAndSettle();
+
+    // Select 'Brown' from the dropdown.
+    await tester.tap(find.text('Brown').last);
+    await tester.pumpAndSettle();
+
+    // Bread should update.
+    expect(find.text('Bread: Brown'), findsOneWidget);
+  });
+
+  testWidgets('Segmented control switches between Footlong and Six-inch',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const App());
+
+    // Initially Footlong.
+    expect(find.text('0 Footlong sandwich(es): '), findsOneWidget);
+
+    // Tap the Six-inch segment.
+    await tester.tap(find.text('Six-inch'));
+    await tester.pumpAndSettle();
+
+    // Expect the display to show Six-inch.
+    expect(find.text('0 Six-inch sandwich(es): '), findsOneWidget);
+
+    // Tap Add and verify the size is kept.
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 Six-inch sandwich(es): 🥪'), findsOneWidget);
   });
 }
