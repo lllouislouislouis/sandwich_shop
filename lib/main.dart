@@ -1,5 +1,20 @@
 import 'package:flutter/material.dart';
 
+// Enum representing bread options.
+enum BreadType { white, brown, multigrain }
+
+// Convert an enum value to a readable label.
+String breadTypeToLabel(BreadType type) {
+  switch (type) {
+    case BreadType.white:
+      return 'White';
+    case BreadType.brown:
+      return 'Brown';
+    case BreadType.multigrain:
+      return 'Multi-grain';
+  }
+}
+
 void main() {
   runApp(const App());
 }
@@ -30,6 +45,9 @@ class _OrderScreenState extends State<OrderScreen> {
 
   // Currently selected sandwich size (single-selection via Set).
   final Set<String> _selectedSize = <String>{'Footlong'};
+
+  // Selected bread type.
+  BreadType _selectedBread = BreadType.white;
 
   // Controller for the order note input.
   final TextEditingController _noteController = TextEditingController();
@@ -84,12 +102,37 @@ class _OrderScreenState extends State<OrderScreen> {
               ),
             ),
             const SizedBox(height: 12),
+            // Dropdown to pick bread type.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: DropdownButtonFormField<BreadType>(
+                value: _selectedBread,
+                decoration: const InputDecoration(
+                  labelText: 'Bread type',
+                  border: OutlineInputBorder(),
+                ),
+                items: BreadType.values.map((BreadType bt) {
+                  return DropdownMenuItem<BreadType>(
+                    value: bt,
+                    child: Text(breadTypeToLabel(bt)),
+                  );
+                }).toList(),
+                onChanged: (BreadType? newType) {
+                  if (newType == null) return;
+                  setState(() {
+                    _selectedBread = newType;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
             // Show the item display including the current note.
             OrderItemDisplay(
               _quantity,
               // Use the currently selected size.
               _selectedSize.isNotEmpty ? _selectedSize.first : 'Footlong',
               note: _noteController.text,
+              breadType: _selectedBread,
             ),
             const SizedBox(height: 12),
             // Note input (enter before pressing Add/Remove)
@@ -146,8 +189,10 @@ class OrderItemDisplay extends StatelessWidget {
   final int quantity;
   final String itemType;
   final String? note;
+  final BreadType? breadType;
 
-  const OrderItemDisplay(this.quantity, this.itemType, {this.note, super.key});
+  const OrderItemDisplay(this.quantity, this.itemType,
+      {this.note, this.breadType, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -163,6 +208,16 @@ class OrderItemDisplay extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        if (breadType != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            'Bread: ${breadTypeToLabel(breadType!)}',
+            style: const TextStyle(
+              fontSize: 14.0,
+              color: Colors.black54,
+            ),
+          ),
+        ],
         if (note != null && note!.trim().isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
