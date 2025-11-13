@@ -3,16 +3,16 @@ import 'package:sandwich_shop/viewa/app_styles.dart';
 import 'package:sandwich_shop/repositories/order_repository.dart';
 
 // Enum representing bread options.
-enum BreadType { white, brown, multigrain }
+enum BreadType { white, wheat, wholemeal }
 
 // Convert an enum value to a readable label.
 String breadTypeToLabel(BreadType type) {
   switch (type) {
     case BreadType.white:
       return 'White';
-    case BreadType.brown:
+    case BreadType.wheat:
       return 'Brown';
-    case BreadType.multigrain:
+    case BreadType.wholemeal:
       return 'Multi-grain';
   }
 }
