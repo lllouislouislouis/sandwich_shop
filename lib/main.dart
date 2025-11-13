@@ -33,29 +33,33 @@ class App extends StatelessWidget {
 
 class StyledButton extends StatelessWidget {
   final VoidCallback? onPressed;
+  final IconData icon;
   final Color backgroundColor;
-  final Color foregroundColor;
-  final String text;
+  final String label;
 
   const StyledButton(
-      {required this.text,
+      {super.key,
       required this.onPressed,
-      this.backgroundColor = Colors.green,
-      this.foregroundColor = Colors.white,
-      super.key});
+      required this.icon,
+      required this.label,
+      required this.backgroundColor //= Colors.green,
+      });
 
   @override
   Widget build(BuildContext context) {
+    ButtonStyle myButtonStyle = ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: Colors.grey,
+        disabledForegroundColor: Colors.white70,
+        textStyle: normalText);
+
     return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-          backgroundColor: onPressed != null ? backgroundColor : Colors.grey,
-          disabledBackgroundColor: Colors.grey,
-          foregroundColor: foregroundColor,
-          disabledForegroundColor: Colors.white70,
-          textStyle: normalText),
-      child: Text(text),
-    );
+        onPressed: onPressed,
+        style: myButtonStyle,
+        child: Row(
+          children: [Icon(icon), const SizedBox(width: 8), Text(label)],
+        ));
   }
 }
 
@@ -156,7 +160,7 @@ class _OrderScreenState extends State<OrderScreen> {
               quantity: _orderRepository.quantity,
               itemType: sandwichType,
               breadType: _selectedBreadType,
-              orderNote: noteForDisplay,
+              note: noteForDisplay,
             ),
             const SizedBox(height: 20),
             Row(
@@ -213,138 +217,6 @@ class _OrderScreenState extends State<OrderScreen> {
     );
   }
 }
-  int _quantity = 0;
-
-  // Currently selected sandwich size (single value now).
-  String _selectedSize = 'Footlong';
-
-  // Selected bread type.
-  BreadType _selectedBread = BreadType.white;
-
-  // Controller for the order note input.
-  final TextEditingController _noteController = TextEditingController();
-
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
-  }
-
-  void _increaseQuantity() {
-    if (_quantity < widget.maxQuantity) {
-      setState(() => _quantity++);
-    }
-  }
-
-  void _decreaseQuantity() {
-    if (_quantity > 0) {
-      setState(() => _quantity--);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sandwich Counter', style: heading1)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // Slider to choose sandwich size (Six-inch <-> Footlong).
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Size: $_selectedSize', style: normalText),
-                  Slider(
-                    value: _selectedSize == 'Footlong' ? 1.0 : 0.0,
-                    min: 0.0,
-                    max: 1.0,
-                    divisions: 1,
-                    label: _selectedSize,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        _selectedSize =
-                            newValue >= 0.5 ? 'Footlong' : 'Six-inch';
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Dropdown to pick bread type.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: DropdownButtonFormField<BreadType>(
-                style: normalText,
-                initialValue: _selectedBread,
-                decoration: const InputDecoration(
-                  labelText: 'Bread type',
-                  border: OutlineInputBorder(),
-                ),
-                items: BreadType.values.map((BreadType bt) {
-                  return DropdownMenuItem<BreadType>(
-                    value: bt,
-                    child: Text(breadTypeToLabel(bt)),
-                  );
-                }).toList(),
-                onChanged: (BreadType? newType) {
-                  if (newType == null) return;
-                  setState(() {
-                    _selectedBread = newType;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Show the item display including the current note.
-            OrderItemDisplay(
-              _quantity,
-              // Use the currently selected size.
-              _selectedSize,
-              note: _noteController.text,
-              breadType: _selectedBread,
-            ),
-            const SizedBox(height: 12),
-            // Note input (enter before pressing Add/Remove)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: TextField(
-                controller: _noteController,
-                decoration: const InputDecoration(
-                  labelText: 'Add a note (e.g., "no onions")',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  // Update UI as user types so the OrderItemDisplay shows the note.
-                  setState(() {});
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                StyledButton(
-                    text: "Add",
-                    onPressed: _quantity < widget.maxQuantity
-                        ? _increaseQuantity
-                        : null),
-                const SizedBox(width: 12),
-                StyledButton(
-                    text: "Remove",
-                    onPressed: _quantity > 0 ? _decreaseQuantity : null,
-                    backgroundColor: Colors.red),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class OrderItemDisplay extends StatelessWidget {
   final int quantity;
@@ -352,8 +224,13 @@ class OrderItemDisplay extends StatelessWidget {
   final String? note;
   final BreadType? breadType;
 
-  const OrderItemDisplay(this.quantity, this.itemType,
-      {this.note, this.breadType, super.key});
+  const OrderItemDisplay({
+    super.key,
+    required this.quantity,
+    required this.itemType,
+    this.note,
+    this.breadType,
+  });
 
   @override
   Widget build(BuildContext context) {
