@@ -234,20 +234,20 @@ class OrderItemDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String bread =
+        breadType?.name ?? 'unknown'; // uses enum name (lowercase)
     final String sandwichIcons = '🥪' * quantity;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('$quantity $itemType sandwich(es): $sandwichIcons',
+        // Match test expectation: "0 white footlong sandwich(es): " etc.
+        Text('$quantity $bread $itemType sandwich(es): $sandwichIcons',
             style: normalText),
-        if (breadType != null) ...[
-          const SizedBox(height: 6),
-          Text('Bread: ${breadTypeToLabel(breadType!)}', style: normalText),
-        ],
         if (note != null && note!.trim().isNotEmpty) ...[
           const SizedBox(height: 6),
+          // Match test expectation: "Note: Extra mayo"
           Text(
-            'Notes: ${note!}',
+            'Note: ${note!}',
             style: const TextStyle(
               fontSize: 14.0,
               color: Colors.black87,
