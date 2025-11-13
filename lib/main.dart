@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_shop/viewa/app_styles.dart';
 
 // Enum representing bread options.
 enum BreadType { white, brown, multigrain }
@@ -47,11 +48,11 @@ class StyledButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: onPressed != null ? backgroundColor : Colors.grey,
-        disabledBackgroundColor: Colors.grey,
-        foregroundColor: foregroundColor,
-        disabledForegroundColor: Colors.white70,
-      ),
+          backgroundColor: onPressed != null ? backgroundColor : Colors.grey,
+          disabledBackgroundColor: Colors.grey,
+          foregroundColor: foregroundColor,
+          disabledForegroundColor: Colors.white70,
+          textStyle: normalText),
       child: Text(text),
     );
   }
@@ -101,9 +102,7 @@ class _OrderScreenState extends State<OrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sandwich Counter'),
-      ),
+      appBar: AppBar(title: const Text('Sandwich Counter', style: heading1)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -114,7 +113,7 @@ class _OrderScreenState extends State<OrderScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Size: $_selectedSize'),
+                  Text('Size: $_selectedSize', style: normalText),
                   Slider(
                     value: _selectedSize == 'Footlong' ? 1.0 : 0.0,
                     min: 0.0,
@@ -136,6 +135,7 @@ class _OrderScreenState extends State<OrderScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: DropdownButtonFormField<BreadType>(
+                style: normalText,
                 initialValue: _selectedBread,
                 decoration: const InputDecoration(
                   labelText: 'Bread type',
@@ -203,19 +203,6 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 }
 
-//onPressed)
-// ElevatedButton(
-//   onPressed:
-//       _quantity < widget.maxQuantity ? _increaseQuantity : null,
-//   style: ElevatedButton.styleFrom(
-//     backgroundColor: Colors.green,
-//     disabledBackgroundColor: Colors.grey,
-//     foregroundColor: Colors.white,
-//     disabledForegroundColor: Colors.white70,
-//   ),
-//   child: const Text('Add'),
-// ),
-
 class OrderItemDisplay extends StatelessWidget {
   final int quantity;
   final String itemType;
@@ -231,23 +218,11 @@ class OrderItemDisplay extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '$quantity $itemType sandwich(es): $sandwichIcons',
-          style: const TextStyle(
-            fontSize: 20.0,
-            color: Colors.green,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text('$quantity $itemType sandwich(es): $sandwichIcons',
+            style: normalText),
         if (breadType != null) ...[
           const SizedBox(height: 6),
-          Text(
-            'Bread: ${breadTypeToLabel(breadType!)}',
-            style: const TextStyle(
-              fontSize: 14.0,
-              color: Colors.black54,
-            ),
-          ),
+          Text('Bread: ${breadTypeToLabel(breadType!)}', style: normalText),
         ],
         if (note != null && note!.trim().isNotEmpty) ...[
           const SizedBox(height: 6),
