@@ -71,8 +71,8 @@ class OrderScreen extends StatefulWidget {
 class _OrderScreenState extends State<OrderScreen> {
   int _quantity = 0;
 
-  // Currently selected sandwich size (single-selection via Set).
-  final Set<String> _selectedSize = <String>{'Footlong'};
+  // Currently selected sandwich size (single value now).
+  String _selectedSize = 'Footlong';
 
   // Selected bread type.
   BreadType _selectedBread = BreadType.white;
@@ -108,25 +108,27 @@ class _OrderScreenState extends State<OrderScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // Segmented control to switch sandwich size.
+            // Slider to choose sandwich size (Six-inch <-> Footlong).
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: SegmentedButton<String>(
-                segments: const <ButtonSegment<String>>[
-                  ButtonSegment<String>(
-                      value: 'Footlong', label: Text('Footlong')),
-                  ButtonSegment<String>(
-                      value: 'Six-inch', label: Text('Six-inch')),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Size: $_selectedSize'),
+                  Slider(
+                    value: _selectedSize == 'Footlong' ? 1.0 : 0.0,
+                    min: 0.0,
+                    max: 1.0,
+                    divisions: 1,
+                    label: _selectedSize,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        _selectedSize =
+                            newValue >= 0.5 ? 'Footlong' : 'Six-inch';
+                      });
+                    },
+                  ),
                 ],
-                selected: _selectedSize,
-                onSelectionChanged: (Set<String> newSelection) {
-                  setState(() {
-                    // Keep only the single selection.
-                    _selectedSize
-                      ..clear()
-                      ..addAll(newSelection);
-                  });
-                },
               ),
             ),
             const SizedBox(height: 12),
@@ -158,7 +160,7 @@ class _OrderScreenState extends State<OrderScreen> {
             OrderItemDisplay(
               _quantity,
               // Use the currently selected size.
-              _selectedSize.isNotEmpty ? _selectedSize.first : 'Footlong',
+              _selectedSize,
               note: _noteController.text,
               breadType: _selectedBread,
             ),
