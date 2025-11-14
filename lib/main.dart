@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_shop/repositories/pricing_repository.dart';
 import 'package:sandwich_shop/viewa/app_styles.dart';
 import 'package:sandwich_shop/repositories/order_repository.dart';
 
@@ -146,6 +147,11 @@ class _OrderScreenState extends State<OrderScreen> {
       noteForDisplay = _notesController.text;
     }
 
+    final pricing = PricingRepository(
+        quantity: _orderRepository.quantity, sandwichType: sandwichType);
+
+    final int totalPrice = pricing.totalPrice;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -162,6 +168,12 @@ class _OrderScreenState extends State<OrderScreen> {
               itemType: sandwichType,
               breadType: _selectedBreadType,
               note: noteForDisplay,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Total price: £$totalPrice',
+              key: const Key('total_price_text'),
+              style: normalText,
             ),
             const SizedBox(height: 20),
             Row(
