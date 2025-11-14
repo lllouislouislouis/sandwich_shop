@@ -61,11 +61,14 @@ void main() {
     testWidgets('changes bread type with DropdownMenu',
         (WidgetTester tester) async {
       await tester.pumpWidget(const App());
+      // Open dropdown
       await tester.tap(find.byType(DropdownMenu<BreadType>));
       await tester.pumpAndSettle();
+      // Select wheat
       await tester.tap(find.text('wheat').last);
       await tester.pumpAndSettle();
       expect(find.textContaining('wheat footlong sandwich'), findsOneWidget);
+      // Open again and select wholemeal
       await tester.tap(find.byType(DropdownMenu<BreadType>));
       await tester.pumpAndSettle();
       await tester.tap(find.text('wholemeal').last);
@@ -82,19 +85,23 @@ void main() {
       expect(find.text('Note: Extra mayo'), findsOneWidget);
     });
 
-    testWidgets('toggles size Switch between six-inch and footlong',
+    testWidgets('toggles size Switch between six-inch and footlong using key',
         (WidgetTester tester) async {
       await tester.pumpWidget(const App());
       // initial should be footlong
       expect(find.text('0 white footlong sandwich(es): '), findsOneWidget);
 
+      // Tap the size switch (identified by the key 'size_switch')
+      final Finder sizeSwitch = find.byKey(const Key('size_switch'));
+      expect(sizeSwitch, findsOneWidget);
+
       // toggle to six-inch
-      await tester.tap(find.byType(Switch));
+      await tester.tap(sizeSwitch);
       await tester.pump();
       expect(find.text('0 white six-inch sandwich(es): '), findsOneWidget);
 
       // toggle back to footlong
-      await tester.tap(find.byType(Switch));
+      await tester.tap(sizeSwitch);
       await tester.pump();
       expect(find.text('0 white footlong sandwich(es): '), findsOneWidget);
     });
@@ -108,9 +115,7 @@ void main() {
         label: 'Test Add',
         backgroundColor: Colors.blue,
       );
-      const testApp = MaterialApp(
-        home: Scaffold(body: testButton),
-      );
+      const testApp = MaterialApp(home: Scaffold(body: testButton));
       await tester.pumpWidget(testApp);
       expect(find.byIcon(Icons.add), findsOneWidget);
       expect(find.text('Test Add'), findsOneWidget);
@@ -127,9 +132,7 @@ void main() {
         breadType: BreadType.white,
         note: 'No notes added.',
       );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
+      const testApp = MaterialApp(home: Scaffold(body: widgetToBeTested));
       await tester.pumpWidget(testApp);
       expect(find.text('0 white footlong sandwich(es): '), findsOneWidget);
       expect(find.text('Note: No notes added.'), findsOneWidget);
@@ -143,9 +146,7 @@ void main() {
         breadType: BreadType.white,
         note: 'No notes added.',
       );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
+      const testApp = MaterialApp(home: Scaffold(body: widgetToBeTested));
       await tester.pumpWidget(testApp);
       expect(
           find.text('3 white footlong sandwich(es): 🥪🥪🥪'), findsOneWidget);
@@ -160,9 +161,7 @@ void main() {
         breadType: BreadType.wheat,
         note: 'No pickles',
       );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
+      const testApp = MaterialApp(home: Scaffold(body: widgetToBeTested));
       await tester.pumpWidget(testApp);
       expect(find.text('2 wheat six-inch sandwich(es): 🥪🥪'), findsOneWidget);
       expect(find.text('Note: No pickles'), findsOneWidget);
@@ -176,9 +175,7 @@ void main() {
         breadType: BreadType.wholemeal,
         note: 'Lots of lettuce',
       );
-      const testApp = MaterialApp(
-        home: Scaffold(body: widgetToBeTested),
-      );
+      const testApp = MaterialApp(home: Scaffold(body: widgetToBeTested));
       await tester.pumpWidget(testApp);
       expect(
           find.text('1 wholemeal footlong sandwich(es): 🥪'), findsOneWidget);
