@@ -12,6 +12,12 @@ class Cart {
     return _items[sandwich] ?? 0;
   }
 
+  // Add sandwiches to cart with optional quantity parameter
+  void add(Sandwich sandwich, {int quantity = 1}) {
+    if (quantity <= 0) return;
+    _items[sandwich] = (_items[sandwich] ?? 0) + quantity;
+  }
+
   // Add one sandwich to the cart
   void increment(Sandwich sandwich) {
     _items[sandwich] = (_items[sandwich] ?? 0) + 1;
@@ -61,9 +67,10 @@ class Cart {
   int get totalPrice {
     int total = 0;
     _items.forEach((sandwich, quantity) {
+      String sandwichType = sandwich.isFootlong ? 'footlong' : 'six-inch';
       final pricing = PricingRepository(
         quantity: quantity,
-        sandwichType: sandwich.isFootlong ? 'footlong' : 'six-inch',
+        sandwichType: sandwichType,
       );
       total += pricing.totalPrice;
     });
