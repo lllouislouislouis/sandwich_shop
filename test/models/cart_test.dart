@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
-import 'package:sandwich_shop/main.dart';
 
 void main() {
   group('Cart', () {
@@ -12,18 +11,20 @@ void main() {
 
     setUp(() {
       cart = Cart();
-      footlongWhite = const Sandwich(
+      footlongWhite = Sandwich(
+        type: SandwichType.veggieDelight,
         breadType: BreadType.white,
         isFootlong: true,
       );
-      sixInchWheat = const Sandwich(
+      sixInchWheat = Sandwich(
+        type: SandwichType.veggieDelight,
         breadType: BreadType.wheat,
         isFootlong: false,
       );
-      footlongWholemeal = const Sandwich(
+      footlongWholemeal = Sandwich(
+        type: SandwichType.veggieDelight,
         breadType: BreadType.wholemeal,
         isFootlong: true,
-        isToasted: true,
       );
     });
 
@@ -165,23 +166,28 @@ void main() {
       expect(cart.totalItems, 6);
     });
 
-    test('different sandwich configurations are treated as different items',
-        () {
-      final toasted = Sandwich(
-        breadType: BreadType.white,
-        isFootlong: true,
-        isToasted: true,
-      );
-      final untoasted = Sandwich(
-        breadType: BreadType.white,
-        isFootlong: true,
-        isToasted: false,
-      );
-      cart.increment(toasted);
-      cart.increment(untoasted);
-      expect(cart.getQuantity(toasted), 1);
-      expect(cart.getQuantity(untoasted), 1);
-      expect(cart.totalItems, 2);
+    test('add method with quantity parameter adds multiple sandwiches', () {
+      cart.add(footlongWhite, quantity: 5);
+      expect(cart.getQuantity(footlongWhite), 5);
+      expect(cart.totalItems, 5);
+    });
+
+    test('add method with default quantity adds one sandwich', () {
+      cart.add(footlongWhite);
+      expect(cart.getQuantity(footlongWhite), 1);
+    });
+
+    test('add method ignores zero or negative quantities', () {
+      cart.add(footlongWhite, quantity: 0);
+      expect(cart.isEmpty, true);
+      cart.add(footlongWhite, quantity: -3);
+      expect(cart.isEmpty, true);
+    });
+
+    test('add method accumulates quantities for same sandwich', () {
+      cart.add(footlongWhite, quantity: 3);
+      cart.add(footlongWhite, quantity: 2);
+      expect(cart.getQuantity(footlongWhite), 5);
     });
   });
 }
