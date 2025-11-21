@@ -306,4 +306,244 @@ void main() {
       expect(find.byIcon(Icons.remove), findsOneWidget);
     });
   });
+
+  group('OrderScreen - Cart Summary', () {
+    testWidgets('displays initial cart summary with zero items',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cart Summary'), findsOneWidget);
+      expect(find.text('0 item(s)'), findsOneWidget);
+      expect(find.text('£0.00'), findsOneWidget);
+      expect(find.byIcon(Icons.shopping_cart), findsOneWidget);
+    });
+
+    testWidgets('updates cart summary when item is added',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Verify initial state
+      expect(find.text('0 item(s)'), findsOneWidget);
+      expect(find.text('£0.00'), findsOneWidget);
+
+      // Add item to cart
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+
+      // Verify cart updated
+      expect(find.text('1 item(s)'), findsOneWidget);
+      expect(find.text('0 item(s)'), findsNothing);
+
+      // Price should be greater than 0
+      expect(find.textContaining('£'), findsWidgets);
+      expect(find.text('£0.00'), findsNothing);
+    });
+
+    testWidgets('updates cart summary with multiple quantities',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Increase quantity to 3
+      await tester.ensureVisible(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+
+      expect(find.text('3'), findsOneWidget);
+
+      // Add to cart
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+
+      // Verify cart shows 3 items
+      expect(find.text('3 item(s)'), findsOneWidget);
+    });
+
+    testWidgets('updates total price correctly when multiple items added',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Add first item
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+
+      // Get first price
+      final firstPriceFinder = find.textContaining('£').last;
+      final firstPriceText = tester.widget<Text>(firstPriceFinder).data!;
+
+      // Add second item
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+
+      // Verify item count increased
+      expect(find.text('2 item(s)'), findsOneWidget);
+
+      // Get second price
+      final secondPriceFinder = find.textContaining('£').last;
+      final secondPriceText = tester.widget<Text>(secondPriceFinder).data!;
+
+      // Second price should be different (higher) than first
+      expect(secondPriceText, isNot(equals(firstPriceText)));
+    });
+
+    testWidgets('cart summary displays in a Card widget',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Verify card exists
+      expect(find.byType(Card), findsWidgets);
+
+      // Verify cart summary is within the card
+      final card = find.ancestor(
+        of: find.text('Cart Summary'),
+        matching: find.byType(Card),
+      );
+      expect(card, findsOneWidget);
+    });
+  });
+
+  group('OrderScreen - On-Screen Confirmation', () {
+    testWidgets('shows SnackBar when item is added to cart',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Add item to cart
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pump(); // Start the animation
+      await tester.pump(const Duration(milliseconds: 100)); // Advance animation
+
+      // Verify SnackBar appears
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Added to cart successfully!'), findsOneWidget);
+    });
+
+    testWidgets('SnackBar contains UNDO action', (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Add item to cart
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Verify UNDO action exists
+      expect(find.text('UNDO'), findsOneWidget);
+      expect(find.byType(SnackBarAction), findsOneWidget);
+    });
+
+    testWidgets('SnackBar dismisses after duration',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Add item to cart
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // SnackBar should be visible
+      expect(find.byType(SnackBar), findsOneWidget);
+
+      // Wait for SnackBar to dismiss (2 seconds duration)
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
+      // SnackBar should be dismissed
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('UNDO button is tappable', (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Add item to cart
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Tap UNDO button
+      await tester.tap(find.text('UNDO'));
+      await tester.pumpAndSettle();
+
+      // SnackBar should be dismissed after tapping UNDO
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('shows SnackBar for each add to cart action',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Add first item
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Added to cart successfully!'), findsOneWidget);
+
+      // Wait for first SnackBar to dismiss
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
+      // Add second item
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // SnackBar should appear again
+      expect(find.text('Added to cart successfully!'), findsOneWidget);
+    });
+
+    testWidgets('SnackBar message is correctly formatted',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App());
+      await tester.pumpAndSettle();
+
+      // Add item to cart
+      await tester.ensureVisible(find.text('Add to Cart'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add to Cart'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Verify message format
+      final snackBarText = find.text('Added to cart successfully!');
+      expect(snackBarText, findsOneWidget);
+
+      // Verify text is within SnackBar
+      final snackBar = find.ancestor(
+        of: snackBarText,
+        matching: find.byType(SnackBar),
+      );
+      expect(snackBar, findsOneWidget);
+    });
+  });
 }
