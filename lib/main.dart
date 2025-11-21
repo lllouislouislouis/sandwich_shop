@@ -117,6 +117,18 @@ class _OrderScreenState extends State<OrderScreen> {
           'Added $_quantity $sizeText ${sandwich.name} sandwich(es) on ${_selectedBreadType.name} bread to cart';
 
       debugPrint(confirmationMessage);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added to cart successfully!'),
+          duration: Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'UNDO',
+            onPressed: () {
+              // Undo action
+            },
+          ),
+        ),
+      );
     }
   }
 
@@ -219,6 +231,45 @@ class _OrderScreenState extends State<OrderScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Cart Summary Card
+              Card(
+                margin: const EdgeInsets.all(16),
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.shopping_cart, color: Colors.green),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Cart Summary',
+                                style: heading2.copyWith(fontSize: 16),
+                              ),
+                              Text(
+                                '${_cart.totalItems} item(s)',
+                                style: normalText.copyWith(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '£${_cart.totalPrice.toStringAsFixed(2)}',
+                        style: heading2.copyWith(
+                          color: Colors.green,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               SizedBox(
                 height: 300,
                 child: Image.asset(
