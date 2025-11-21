@@ -271,10 +271,10 @@ class _OrderScreenState extends State<OrderScreen> {
                 ),
               ),
               SizedBox(
-                height: 300,
+                height: 200,
                 child: Image.asset(
                   _getCurrentImagePath(),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.scaleDown,
                   errorBuilder: (context, error, stackTrace) {
                     return const Center(
                       child: Text(
