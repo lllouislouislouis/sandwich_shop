@@ -197,9 +197,11 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   void _increaseQuantity() {
-    setState(() {
-      _quantity++;
-    });
+    if (_quantity < widget.maxQuantity) {
+      setState(() {
+        _quantity++;
+      });
+    }
   }
 
   void _decreaseQuantity() {
@@ -213,6 +215,13 @@ class _OrderScreenState extends State<OrderScreen> {
   VoidCallback? _getDecreaseCallback() {
     if (_quantity > 0) {
       return _decreaseQuantity;
+    }
+    return null;
+  }
+
+  VoidCallback? _getIncreaseCallback() {
+    if (_quantity < widget.maxQuantity) {
+      return _increaseQuantity;
     }
     return null;
   }
@@ -326,7 +335,7 @@ class _OrderScreenState extends State<OrderScreen> {
                   ),
                   Text('$_quantity', style: heading2),
                   IconButton(
-                    onPressed: _increaseQuantity,
+                    onPressed: _getIncreaseCallback(),
                     icon: const Icon(Icons.add),
                   ),
                 ],
