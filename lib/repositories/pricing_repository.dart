@@ -1,17 +1,13 @@
 class PricingRepository {
-  final int _footlongPrice = 11;
-  final int _sixInchPrice = 7;
+  double calculatePrice({required int quantity, required bool isFootlong}) {
+    double price = 0.0;
 
-  final int quantity;
-  final String sandwichType;
+    if (isFootlong) {
+      price = 11.00;
+    } else {
+      price = 7.00;
+    }
 
-  const PricingRepository({
-    required this.quantity, 
-    required this.sandwichType
-    });
-
-  int get _unitPrice =>
-      sandwichType == 'footlong' ? _footlongPrice : _sixInchPrice;
-
-  int get totalPrice => (_unitPrice * (quantity < 0 ? 0 : quantity));
+    return quantity * price;
+  }
 }
