@@ -13,3 +13,7 @@ const heading2 = TextStyle(
   fontSize: 20,
   fontWeight: FontWeight.bold,
 );
+
+const body = TextStyle(
+  fontSize: 10,
+);
