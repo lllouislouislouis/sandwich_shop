@@ -81,8 +81,43 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   void _handleSignIn() {
+    // Dismiss keyboard
+    FocusScope.of(context).unfocus();
+
     if (_validateForm()) {
-      // Validation passed - will implement success feedback in next subtask
+      // Get username before clearing
+      final username = _usernameController.text.trim();
+
+      // Clear form fields after successful validation
+      _usernameController.clear();
+      _passwordController.clear();
+
+      // Show success SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(
+                Icons.check_circle,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Welcome, $username! Sign-in successful.',
+                  style: body.copyWith(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
     }
   }
 
