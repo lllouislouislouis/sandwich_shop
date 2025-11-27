@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_styles.dart';
+import '../views/app_styles.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -9,6 +9,83 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  // Text editing controllers
+  late TextEditingController _usernameController;
+  late TextEditingController _passwordController;
+
+  // Error state variables
+  String? _usernameError;
+  String? _passwordError;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController = TextEditingController();
+    _passwordController = TextEditingController();
+
+    // Add listeners to clear errors when user types
+    _usernameController.addListener(_clearUsernameError);
+    _passwordController.addListener(_clearPasswordError);
+  }
+
+  @override
+  void dispose() {
+    // Remove listeners before disposing
+    _usernameController.removeListener(_clearUsernameError);
+    _passwordController.removeListener(_clearPasswordError);
+
+    // Dispose controllers to prevent memory leaks
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _clearUsernameError() {
+    if (_usernameError != null) {
+      setState(() {
+        _usernameError = null;
+      });
+    }
+  }
+
+  void _clearPasswordError() {
+    if (_passwordError != null) {
+      setState(() {
+        _passwordError = null;
+      });
+    }
+  }
+
+  bool _validateForm() {
+    bool isValid = true;
+
+    setState(() {
+      // Validate username
+      if (_usernameController.text.trim().isEmpty) {
+        _usernameError = 'Username is required';
+        isValid = false;
+      } else {
+        _usernameError = null;
+      }
+
+      // Validate password
+      if (_passwordController.text.isEmpty) {
+        _passwordError = 'Password is required';
+        isValid = false;
+      } else {
+        _passwordError = null;
+      }
+    });
+
+    return isValid;
+  }
+
+  void _handleSignIn() {
+    if (_validateForm()) {
+      // Validation passed - will implement success feedback in next subtask
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +103,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 40),
 
               // App Title/Logo Area
-              Icon(
+              const Icon(
                 Icons.restaurant_menu,
                 size: 80,
                 color: Colors.orange,
@@ -34,7 +111,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 16),
               Text(
                 'Sandwich Shop',
-                style: AppStyles.heading1.copyWith(
+                style: heading1.copyWith(
                   fontSize: 28,
                   color: Colors.orange,
                 ),
@@ -43,7 +120,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 8),
               Text(
                 'Sign in to start ordering',
-                style: AppStyles.body.copyWith(
+                style: body.copyWith(
                   color: Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,
@@ -53,11 +130,17 @@ class _AuthScreenState extends State<AuthScreen> {
 
               // Username Field
               TextField(
+                controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: 'Username',
-                  labelStyle: AppStyles.body,
+                  labelStyle: body,
                   hintText: 'Enter your username',
                   prefixIcon: const Icon(Icons.person),
+                  errorText: _usernameError,
+                  errorStyle: body.copyWith(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -70,20 +153,34 @@ class _AuthScreenState extends State<AuthScreen> {
                     borderSide:
                         const BorderSide(color: Colors.orange, width: 2),
                   ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.red, width: 1),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                  ),
                 ),
-                style: AppStyles.body,
+                style: body,
               ),
 
               const SizedBox(height: 24),
 
               // Password Field
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  labelStyle: AppStyles.body,
+                  labelStyle: body,
                   hintText: 'Enter your password',
                   prefixIcon: const Icon(Icons.lock),
+                  errorText: _passwordError,
+                  errorStyle: body.copyWith(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -96,17 +193,23 @@ class _AuthScreenState extends State<AuthScreen> {
                     borderSide:
                         const BorderSide(color: Colors.orange, width: 2),
                   ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.red, width: 1),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                  ),
                 ),
-                style: AppStyles.body,
+                style: body,
               ),
 
               const SizedBox(height: 32),
 
               // Sign In Button
               ElevatedButton(
-                onPressed: () {
-                  // Placeholder - will be implemented in next subtask
-                },
+                onPressed: _handleSignIn,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
@@ -118,7 +221,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 child: Text(
                   'Sign In',
-                  style: AppStyles.body.copyWith(
+                  style: body.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
