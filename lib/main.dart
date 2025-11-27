@@ -17,9 +17,9 @@ class App extends StatelessWidget {
       create: (context) => Cart(),
       child: MaterialApp(
         title: 'Sandwich Shop App',
-        home: OrderScreen(maxQuantity: 5),
+        home: const OrderScreen(maxQuantity: 5),
         routes: {
-          '/about': (context) => AboutScreen(),
+          '/about': (context) => const AboutScreen(),
         },
       ),
     );
