@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sandwich_shop/views/app_styles.dart';
 import 'package:sandwich_shop/views/cart_screen.dart';
 import 'package:sandwich_shop/views/auth_screen.dart';
+import 'package:sandwich_shop/widgets/app_scaffold.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 
@@ -17,7 +19,6 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  final Cart _cart = Cart();
   final TextEditingController _notesController = TextEditingController();
 
   SandwichType _selectedSandwichType = SandwichType.veggieDelight;
@@ -47,8 +48,11 @@ class _OrderScreenState extends State<OrderScreen> {
         breadType: _selectedBreadType,
       );
 
+      // Access cart from Provider
+      final cart = Provider.of<Cart>(context, listen: false);
+
       setState(() {
-        _cart.add(sandwich, quantity: _quantity);
+        cart.add(sandwich, quantity: _quantity);
       });
 
       String sizeText;
@@ -77,10 +81,11 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   void _navigateToCartView() {
+    final cart = Provider.of<Cart>(context, listen: false);
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => CartScreen(cart: _cart),
+        builder: (BuildContext context) => CartScreen(cart: cart),
       ),
     );
   }
@@ -122,20 +127,11 @@ class _OrderScreenState extends State<OrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 100,
-            child: Image.asset('assets/images/logo.png'),
-          ),
-        ),
-        title: const Text(
-          'Sandwich Counter',
-          style: heading1,
-        ),
-      ),
+    // Get cart for display purposes
+    final cart = Provider.of<Cart>(context);
+
+    return AppScaffold(
+      title: 'Sandwich Counter',
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -146,14 +142,6 @@ class _OrderScreenState extends State<OrderScreen> {
                 child: Image.asset(
                   _getCurrentImagePath(),
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Text(
-                        'Image not found',
-                        style: normalText,
-                      ),
-                    );
-                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -164,7 +152,9 @@ class _OrderScreenState extends State<OrderScreen> {
                 initialSelection: _selectedSandwichType,
                 onSelected: (SandwichType? value) {
                   if (value != null) {
-                    setState(() => _selectedSandwichType = value);
+                    setState(() {
+                      _selectedSandwichType = value;
+                    });
                   }
                 },
                 dropdownMenuEntries: _buildSandwichTypeEntries(),
@@ -173,12 +163,26 @@ class _OrderScreenState extends State<OrderScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Six-inch', style: normalText),
-                  Switch(
-                    value: _isFootlong,
-                    onChanged: (value) => setState(() => _isFootlong = value),
+                  const Text('Size: ', style: normalText),
+                  ChoiceChip(
+                    label: const Text('6"'),
+                    selected: !_isFootlong,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        _isFootlong = !selected;
+                      });
+                    },
                   ),
-                  const Text('Footlong', style: normalText),
+                  const SizedBox(width: 10),
+                  ChoiceChip(
+                    label: const Text('Footlong'),
+                    selected: _isFootlong,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        _isFootlong = selected;
+                      });
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -189,7 +193,9 @@ class _OrderScreenState extends State<OrderScreen> {
                 initialSelection: _selectedBreadType,
                 onSelected: (BreadType? value) {
                   if (value != null) {
-                    setState(() => _selectedBreadType = value);
+                    setState(() {
+                      _selectedBreadType = value;
+                    });
                   }
                 },
                 dropdownMenuEntries: _buildBreadTypeEntries(),
@@ -200,15 +206,25 @@ class _OrderScreenState extends State<OrderScreen> {
                 children: [
                   const Text('Quantity: ', style: normalText),
                   IconButton(
-                    onPressed: _quantity > 0
-                        ? () => setState(() => _quantity--)
-                        : null,
                     icon: const Icon(Icons.remove),
+                    onPressed: _quantity > 1
+                        ? () {
+                            setState(() {
+                              _quantity--;
+                            });
+                          }
+                        : null,
                   ),
-                  Text('$_quantity', style: heading2),
+                  Text('$_quantity', style: normalText),
                   IconButton(
-                    onPressed: () => setState(() => _quantity++),
                     icon: const Icon(Icons.add),
+                    onPressed: _quantity < widget.maxQuantity
+                        ? () {
+                            setState(() {
+                              _quantity++;
+                            });
+                          }
+                        : null,
                   ),
                 ],
               ),
@@ -223,13 +239,13 @@ class _OrderScreenState extends State<OrderScreen> {
               StyledButton(
                 onPressed: _navigateToCartView,
                 icon: Icons.shopping_cart,
-                label: 'View Cart',
+                label: 'View Cart (${cart.countOfItems} items)',
                 backgroundColor: Colors.blue,
               ),
               const SizedBox(height: 20),
               Text(
-                'Cart: ${_cart.countOfItems} items - £${_cart.totalPrice.toStringAsFixed(2)}',
-                style: normalText,
+                'Total: £${cart.totalPrice.toStringAsFixed(2)}',
+                style: heading2,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
@@ -237,7 +253,7 @@ class _OrderScreenState extends State<OrderScreen> {
               // Navigation to Sign In Screen
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: OutlinedButton.icon(
+                child: TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -246,19 +262,7 @@ class _OrderScreenState extends State<OrderScreen> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.login),
-                  label: const Text(
-                    'Sign In to Your Account',
-                    style: normalText,
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.orange,
-                    side: const BorderSide(color: Colors.orange, width: 2),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  child: const Text('Sign In'),
                 ),
               ),
 
