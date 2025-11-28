@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandwich_shop/widgets/app_scaffold.dart';
 import '../views/app_styles.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -60,20 +61,26 @@ class _AuthScreenState extends State<AuthScreen> {
     bool isValid = true;
 
     setState(() {
+      // Reset errors
+      _usernameError = null;
+      _passwordError = null;
+
       // Validate username
       if (_usernameController.text.trim().isEmpty) {
         _usernameError = 'Username is required';
         isValid = false;
-      } else {
-        _usernameError = null;
+      } else if (_usernameController.text.trim().length < 3) {
+        _usernameError = 'Username must be at least 3 characters';
+        isValid = false;
       }
 
       // Validate password
       if (_passwordController.text.isEmpty) {
         _passwordError = 'Password is required';
         isValid = false;
-      } else {
-        _passwordError = null;
+      } else if (_passwordController.text.length < 6) {
+        _passwordError = 'Password must be at least 6 characters';
+        isValid = false;
       }
     });
 
@@ -85,187 +92,118 @@ class _AuthScreenState extends State<AuthScreen> {
     FocusScope.of(context).unfocus();
 
     if (_validateForm()) {
-      // Get username before clearing
-      final username = _usernameController.text.trim();
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Welcome, ${_usernameController.text}!',
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
 
-      // Clear form fields after successful validation
+      // Clear form
       _usernameController.clear();
       _passwordController.clear();
 
-      // Show success SnackBar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(
-                Icons.check_circle,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Welcome, $username! Sign-in successful.',
-                  style: body.copyWith(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
+      // Navigate back to order screen
+      Navigator.of(context).pushReplacementNamed('/');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign In'),
-        backgroundColor: Colors.orange,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 40),
-
-              // App Title/Logo Area
-              const Icon(
-                Icons.restaurant_menu,
-                size: 80,
-                color: Colors.orange,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Sandwich Shop',
-                style: heading1.copyWith(
-                  fontSize: 28,
+    return AppScaffold(
+      title: 'Sign In',
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // App Logo or Icon
+                const Icon(
+                  Icons.lock_outline,
+                  size: 80,
                   color: Colors.orange,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Sign in to start ordering',
-                style: body.copyWith(
-                  color: Colors.grey[600],
+                const SizedBox(height: 32),
+
+                // Welcome Text
+                const Text(
+                  'Welcome Back!',
+                  style: heading1,
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 48),
-
-              // Username Field
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  labelStyle: body,
-                  hintText: 'Enter your username',
-                  prefixIcon: const Icon(Icons.person),
-                  errorText: _usernameError,
-                  errorStyle: body.copyWith(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Colors.orange, width: 2),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.red, width: 1),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.red, width: 2),
-                  ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Sign in to continue',
+                  style: normalText,
+                  textAlign: TextAlign.center,
                 ),
-                style: body,
-              ),
+                const SizedBox(height: 40),
 
-              const SizedBox(height: 24),
+                // Username Field
+                TextField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    labelStyle: normalText,
+                    errorText: _usernameError,
+                    prefixIcon: const Icon(Icons.person),
+                    border: const OutlineInputBorder(),
+                  ),
+                  style: normalText,
+                ),
+                const SizedBox(height: 16),
 
-              // Password Field
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  labelStyle: body,
-                  hintText: 'Enter your password',
-                  prefixIcon: const Icon(Icons.lock),
-                  errorText: _passwordError,
-                  errorStyle: body.copyWith(
-                    color: Colors.red,
-                    fontSize: 12,
+                // Password Field
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    labelStyle: normalText,
+                    errorText: _passwordError,
+                    prefixIcon: const Icon(Icons.lock),
+                    border: const OutlineInputBorder(),
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  style: normalText,
+                ),
+                const SizedBox(height: 24),
+
+                // Sign In Button
+                ElevatedButton(
+                  onPressed: _handleSignIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: heading2,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: Colors.orange, width: 2),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.red, width: 1),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                  child: const Text('Sign In'),
+                ),
+                const SizedBox(height: 16),
+
+                // Register Link (placeholder)
+                TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Registration coming soon!'),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Don\'t have an account? Register',
+                    style: normalText,
                   ),
                 ),
-                style: body,
-              ),
-
-              const SizedBox(height: 32),
-
-              // Sign In Button
-              ElevatedButton(
-                onPressed: _handleSignIn,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 2,
-                ),
-                child: Text(
-                  'Sign In',
-                  style: body.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-            ],
+              ],
+            ),
           ),
         ),
       ),
