@@ -520,3 +520,292 @@ The feature is considered complete when:
 - [ ] No console errors or warnings
 - [ ] UI looks correct on different screen sizes
 - [ ] TextControllers properly disposed (no memory leaks)
+
+
+
+# Requirements Document: Navigation Drawer Feature
+
+## 1. Feature Description
+
+### Overview
+The Navigation Drawer is a slide-out menu panel that provides consistent navigation across all screens in the Sandwich Shop mobile application. This feature enhances user experience by offering quick access to key app sections from any screen.
+
+### Purpose
+- **Improve Navigation**: Provide users with easy access to all main sections of the app
+- **Enhance Usability**: Create a familiar navigation pattern found in modern mobile apps
+- **Reduce Clutter**: Keep the main screen clean while maintaining navigation accessibility
+- **Consistency**: Ensure uniform navigation experience across all screens
+
+### Technical Scope
+- Implement a reusable `AppScaffold` widget containing the drawer
+- Integrate Provider pattern for cart state management
+- Update routing configuration to support named routes
+- Apply consistent styling across all navigation elements
+
+---
+
+## 2. User Stories
+
+### US-1: Customer Browsing Menu
+**As a** customer browsing sandwiches  
+**I want to** access the navigation menu from any screen  
+**So that** I can quickly navigate to other sections without losing my place
+
+**Acceptance Criteria:**
+- Hamburger menu icon visible in AppBar on all screens
+- Drawer opens when tapping hamburger icon
+- Drawer opens when swiping from left edge of screen
+- Current screen context is preserved when drawer opens
+
+---
+
+### US-2: Customer Viewing Cart
+**As a** customer who has added items to my cart  
+**I want to** navigate to checkout from the drawer menu  
+**So that** I can complete my purchase quickly
+
+**Acceptance Criteria:**
+- "Checkout" option is visible in drawer menu
+- Tapping "Checkout" closes drawer and navigates to checkout screen
+- Cart contents are preserved during navigation
+- Cart state is accessible via Provider from checkout screen
+
+---
+
+### US-3: Customer with Empty Cart
+**As a** customer with an empty cart  
+**I want to** be informed when I try to checkout without items  
+**So that** I understand why I cannot proceed to payment
+
+**Acceptance Criteria:**
+- Tapping "Checkout" with empty cart shows error message
+- SnackBar displays: "Your cart is empty. Add items before checking out."
+- Drawer closes even when cart is empty
+- User remains on current screen after error message
+
+---
+
+### US-4: New User Signing In
+**As a** new user  
+**I want to** access the sign-in screen from any page  
+**So that** I can create an account or log in whenever I'm ready
+
+**Acceptance Criteria:**
+- "Sign In" option is visible in drawer menu with login icon
+- Tapping "Sign In" closes drawer and navigates to AuthScreen
+- Navigation works from all screens (Order, Checkout, About)
+- Form fields on AuthScreen are empty on first visit
+
+---
+
+### US-5: Customer Learning About Business
+**As a** curious customer  
+**I want to** access information about the sandwich shop  
+**So that** I can learn about the business and its values
+
+**Acceptance Criteria:**
+- "About Us" option is visible in drawer menu with info icon
+- Tapping "About Us" closes drawer and navigates to AboutScreen
+- About content displays correctly
+- User can navigate back to previous screen
+
+---
+
+### US-6: Customer on Order Screen
+**As a** customer on the order screen  
+**I want to** tap "Order" in the drawer menu  
+**So that** I can confirm I'm on the correct screen or return to ordering
+
+**Acceptance Criteria:**
+- "Order" option is visible in drawer menu with restaurant icon
+- Tapping "Order" while on OrderScreen simply closes drawer
+- Tapping "Order" from other screens navigates to OrderScreen
+- Current order form state is reset when navigating from other screens
+
+---
+
+### US-7: Developer Maintaining Codebase
+**As a** developer maintaining the app  
+**I want to** have a single reusable scaffold component  
+**So that** navigation code is not duplicated across screens
+
+**Acceptance Criteria:**
+- `AppScaffold` widget created in `lib/widgets/app_scaffold.dart`
+- All screens use `AppScaffold` instead of standard `Scaffold`
+- Drawer implementation exists in one location only
+- Changes to drawer automatically reflect across all screens
+
+---
+
+## 3. Acceptance Criteria
+
+### AC-1: Drawer Visual Design
+- [ ] Drawer header displays app logo (assets/images/logo.png)
+- [ ] Drawer header displays "Sandwich Shop" text
+- [ ] Drawer header background color is orange (matching app theme)
+- [ ] Four navigation items are displayed with appropriate icons:
+  - Order (restaurant_menu)
+  - Checkout (shopping_cart)
+  - Sign In (login)
+  - About Us (info)
+- [ ] Text styles match existing app_styles.dart definitions
+- [ ] Drawer width is appropriate for mobile screens (~280-300dp)
+
+### AC-2: Drawer Interaction Behavior
+- [ ] Hamburger menu icon appears in AppBar on all screens
+- [ ] Tapping hamburger icon opens drawer
+- [ ] Swiping from left edge opens drawer
+- [ ] Tapping outside drawer closes it
+- [ ] Pressing device back button closes drawer
+- [ ] Drawer closes before navigation to new screen
+- [ ] Smooth slide-in/slide-out animation
+
+### AC-3: Navigation Functionality
+- [ ] "Order" navigation works from all screens
+- [ ] "Checkout" navigation checks cart state before proceeding
+- [ ] "Sign In" navigation works from all screens
+- [ ] "About Us" navigation works from all screens
+- [ ] Navigation uses `Navigator.pushReplacementNamed()` to prevent stack buildup
+- [ ] Current screen doesn't re-navigate to itself unnecessarily
+
+### AC-4: Cart Integration
+- [ ] Cart state accessible via Provider in drawer logic
+- [ ] Empty cart prevents checkout navigation
+- [ ] SnackBar shows when checkout attempted with empty cart
+- [ ] Cart state persists across navigation
+- [ ] No cart items lost during screen transitions
+
+### AC-5: Error Handling
+- [ ] Empty cart checkout shows user-friendly message
+- [ ] Navigation errors don't crash the app
+- [ ] Back button behavior is predictable and consistent
+- [ ] No navigation loops or dead ends
+
+### AC-6: Code Quality
+- [ ] `AppScaffold` widget created in correct directory
+- [ ] All screens updated to use `AppScaffold`
+- [ ] Named routes defined in main.dart
+- [ ] No duplicate drawer code across screens
+- [ ] Code follows Flutter/Dart style guidelines
+- [ ] Imports are organized and minimal
+
+### AC-7: Routing Configuration
+- [ ] Route `/` maps to OrderScreen
+- [ ] Route `/checkout` maps to CheckoutScreen
+- [ ] Route `/auth` maps to AuthScreen
+- [ ] Route `/about` maps to AboutScreen
+- [ ] Routes handle required parameters (e.g., maxQuantity for OrderScreen)
+
+### AC-8: Performance
+- [ ] Drawer opens/closes smoothly without lag
+- [ ] Navigation transitions are fluid
+- [ ] No memory leaks from navigation stack
+- [ ] App remains responsive during navigation
+
+---
+
+## 4. Technical Specifications
+
+### 4.1 File Structure
+```
+lib/
+├── widgets/
+│   └── app_scaffold.dart          # NEW: Reusable scaffold with drawer
+├── views/
+│   ├── order_screen.dart          # MODIFIED: Use AppScaffold
+│   ├── checkout_screen.dart       # MODIFIED: Use AppScaffold
+│   ├── auth_screen.dart           # MODIFIED: Use AppScaffold
+│   └── about_screen.dart          # MODIFIED: Use AppScaffold
+├── models/
+│   └── cart.dart                  # EXISTING: Cart model with Provider
+└── main.dart                      # MODIFIED: Add named routes
+```
+
+### 4.2 Dependencies
+- `provider: ^6.0.0` (already in project)
+- Flutter SDK (existing)
+
+### 4.3 Key Components
+
+#### AppScaffold Widget
+```dart
+Properties:
+- String title (required)
+- Widget body (required)
+- Widget? floatingActionButton (optional)
+
+Includes:
+- AppBar with title and hamburger menu
+- Drawer with navigation options
+- Body content area
+```
+
+#### Navigation Drawer
+```dart
+Sections:
+- DrawerHeader (logo + app name)
+- ListTile for each navigation option
+
+Navigation Logic:
+- Provider.of<Cart> for cart access
+- Navigator.pop() to close drawer
+- Navigator.pushReplacementNamed() for navigation
+- Conditional navigation based on cart state
+```
+
+---
+
+## 5. Testing Checklist
+
+### Manual Testing
+- [ ] Open drawer from Order screen
+- [ ] Open drawer from Checkout screen
+- [ ] Open drawer from Auth screen
+- [ ] Open drawer from About screen
+- [ ] Navigate to Order from each screen
+- [ ] Navigate to Checkout with items in cart
+- [ ] Navigate to Checkout with empty cart
+- [ ] Navigate to Sign In from each screen
+- [ ] Navigate to About from each screen
+- [ ] Test swipe gesture to open drawer
+- [ ] Test back button to close drawer
+- [ ] Test tap outside drawer to close
+- [ ] Verify cart persists across navigation
+- [ ] Check visual styling matches design
+
+### Edge Cases
+- [ ] Navigate while drawer is opening
+- [ ] Rapidly tap navigation items
+- [ ] Navigate to current screen from drawer
+- [ ] Checkout with cart that becomes empty during navigation
+- [ ] Device rotation with drawer open
+
+---
+
+## 6. Definition of Done
+
+The Navigation Drawer feature is considered complete when:
+
+1. ✅ All user stories are implemented and verified
+2. ✅ All acceptance criteria are met
+3. ✅ `AppScaffold` widget is created and used in all screens
+4. ✅ Named routes are configured in main.dart
+5. ✅ Cart state management works correctly with navigation
+6. ✅ All manual testing checklist items pass
+7. ✅ Code is reviewed and follows project conventions
+8. ✅ No compiler warnings or errors
+9. ✅ App builds and runs on both debug and release modes
+10. ✅ Documentation is updated (if applicable)
+
+---
+
+## 7. Future Enhancements
+
+### Phase 2 Features (Not in Current Scope)
+- Visual indicator for currently active screen in drawer
+- User profile section in drawer header when authenticated
+- Badge showing cart item count on Checkout menu item
+- Drawer menu items disable/highlight based on current route
+- Settings/Preferences option in drawer
+- Order history access from drawer
+- Dark mode toggle in drawer
