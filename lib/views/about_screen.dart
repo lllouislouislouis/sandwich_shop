@@ -1,27 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_shop/views/app_styles.dart';
+import 'package:sandwich_shop/widgets/app_scaffold.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('About Us', style: heading1),
-      ),
-      body: const Padding(
+    return const AppScaffold(
+      title: 'About Us',
+      body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Welcome to Sandwich Shop!', style: heading2),
-            SizedBox(height: 20),
-            Text(
-              'We are a family-owned business dedicated to serving the best sandwiches in town. ',
-              style: normalText,
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Welcome to Sandwich Shop!', style: heading2),
+              SizedBox(height: 20),
+              Text(
+                'We are a family-owned business dedicated to serving the best sandwiches in town. ',
+                style: normalText,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Our Story',
+                style: heading2,
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Founded in 2024, Sandwich Shop has been committed to quality ingredients, '
+                'exceptional service, and delicious sandwiches made fresh to order.',
+                style: normalText,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Our Values',
+                style: heading2,
+              ),
+              SizedBox(height: 10),
+              Text(
+                '• Fresh ingredients daily\n'
+                '• Made-to-order sandwiches\n'
+                '• Fast and friendly service\n'
+                '• Community focused',
+                style: normalText,
+              ),
+            ],
+          ),
         ),
       ),
     );
