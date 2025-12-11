@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../views/app_styles.dart';
-import 'package:provider/provider.dart';
-import 'package:sandwich_shop/models/cart.dart';
+import 'package:sandwich_shop/views/common_widgets.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -124,39 +123,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 100,
-            child: Image.asset('assets/images/logo.png'),
-          ),
-        ),
-        title: Text(
-          'Sign In',
-          style: heading1,
-        ),
-        actions: [
-          Consumer<Cart>(
-            builder: (context, cart, child) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.shopping_cart),
-                      const SizedBox(width: 4),
-                      Text('${cart.countOfItems}'),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: const AppBarWithCart(title: 'Sign In'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -166,7 +133,8 @@ class _AuthScreenState extends State<AuthScreen> {
             Wrap(
               alignment: WrapAlignment.center,
               children: [
-                const Icon(Icons.restaurant_menu, size: 32, color: Colors.orange),
+                const Icon(Icons.restaurant_menu,
+                    size: 32, color: Colors.orange),
                 const SizedBox(width: 8),
                 Text('Sandwich Shop', style: heading1),
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/views/app_styles.dart';
+import 'package:sandwich_shop/views/common_widgets.dart';
 
 class AppScaffold extends StatelessWidget {
   final String title;
@@ -50,11 +51,7 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title, style: heading1),
-        backgroundColor: Colors.orange,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      appBar: AppBarWithCart(title: title),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
