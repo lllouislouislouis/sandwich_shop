@@ -40,6 +40,36 @@ class _OrderScreenState extends State<OrderScreen> {
     super.dispose();
   }
 
+  Future<void> _navigateToProfile() async {
+    final Map<String, String>? result =
+        await Navigator.push<Map<String, String>>(
+      context,
+      MaterialPageRoute<Map<String, String>>(
+        builder: (BuildContext context) => const ProfileScreen(),
+      ),
+    );
+
+    final bool hasResult = result != null;
+    final bool widgetStillMounted = mounted;
+
+    if (hasResult && widgetStillMounted) {
+      _showWelcomeMessage(result);
+    }
+  }
+
+  void _showWelcomeMessage(Map<String, String> profileData) {
+    final String name = profileData['name']!;
+    final String location = profileData['location']!;
+    final String welcomeMessage = 'Welcome, $name! Ordering from $location';
+
+    final SnackBar welcomeSnackBar = SnackBar(
+      content: Text(welcomeMessage),
+      duration: const Duration(seconds: 3),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(welcomeSnackBar);
+  }
+
   void _addToCart() {
     if (_quantity > 0) {
       final Sandwich sandwich = Sandwich(
@@ -48,12 +78,8 @@ class _OrderScreenState extends State<OrderScreen> {
         breadType: _selectedBreadType,
       );
 
-      // Access cart from Provider
-      final cart = Provider.of<Cart>(context, listen: false);
-
-      setState(() {
-        cart.add(sandwich, quantity: _quantity);
-      });
+      final Cart cart = Provider.of<Cart>(context, listen: false);
+      cart.add(sandwich, quantity: _quantity);
 
       String sizeText;
       if (_isFootlong) {
@@ -81,11 +107,10 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   void _navigateToCartView() {
-    final cart = Provider.of<Cart>(context, listen: false);
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => CartScreen(cart: cart),
+        builder: (BuildContext context) => const CartScreen(),
       ),
     );
   }
@@ -127,11 +152,37 @@ class _OrderScreenState extends State<OrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get cart for display purposes
-    final cart = Provider.of<Cart>(context);
-
-    return AppScaffold(
-      title: 'Sandwich Counter',
+    return Scaffold(
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            height: 100,
+            child: Image.asset('assets/images/logo.png'),
+          ),
+        ),
+        title: const Text(
+          'Sandwich Counter',
+          style: heading1,
+        ),
+        actions: [
+          Consumer<Cart>(
+            builder: (context, cart, child) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.shopping_cart),
+                    const SizedBox(width: 4),
+                    Text('${cart.countOfItems}'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -142,6 +193,14 @@ class _OrderScreenState extends State<OrderScreen> {
                 child: Image.asset(
                   _getCurrentImagePath(),
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Text(
+                        'Image not found',
+                        style: normalText,
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -152,9 +211,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 initialSelection: _selectedSandwichType,
                 onSelected: (SandwichType? value) {
                   if (value != null) {
-                    setState(() {
-                      _selectedSandwichType = value;
-                    });
+                    setState(() => _selectedSandwichType = value);
                   }
                 },
                 dropdownMenuEntries: _buildSandwichTypeEntries(),
@@ -163,26 +220,12 @@ class _OrderScreenState extends State<OrderScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Size: ', style: normalText),
-                  ChoiceChip(
-                    label: const Text('6"'),
-                    selected: !_isFootlong,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _isFootlong = !selected;
-                      });
-                    },
+                  const Text('Six-inch', style: normalText),
+                  Switch(
+                    value: _isFootlong,
+                    onChanged: (value) => setState(() => _isFootlong = value),
                   ),
-                  const SizedBox(width: 10),
-                  ChoiceChip(
-                    label: const Text('Footlong'),
-                    selected: _isFootlong,
-                    onSelected: (bool selected) {
-                      setState(() {
-                        _isFootlong = selected;
-                      });
-                    },
-                  ),
+                  const Text('Footlong', style: normalText),
                 ],
               ),
               const SizedBox(height: 20),
@@ -193,9 +236,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 initialSelection: _selectedBreadType,
                 onSelected: (BreadType? value) {
                   if (value != null) {
-                    setState(() {
-                      _selectedBreadType = value;
-                    });
+                    setState(() => _selectedBreadType = value);
                   }
                 },
                 dropdownMenuEntries: _buildBreadTypeEntries(),
@@ -206,25 +247,15 @@ class _OrderScreenState extends State<OrderScreen> {
                 children: [
                   const Text('Quantity: ', style: normalText),
                   IconButton(
+                    onPressed: _quantity > 0
+                        ? () => setState(() => _quantity--)
+                        : null,
                     icon: const Icon(Icons.remove),
-                    onPressed: _quantity > 1
-                        ? () {
-                            setState(() {
-                              _quantity--;
-                            });
-                          }
-                        : null,
                   ),
-                  Text('$_quantity', style: normalText),
+                  Text('$_quantity', style: heading2),
                   IconButton(
+                    onPressed: () => setState(() => _quantity++),
                     icon: const Icon(Icons.add),
-                    onPressed: _quantity < widget.maxQuantity
-                        ? () {
-                            setState(() {
-                              _quantity++;
-                            });
-                          }
-                        : null,
                   ),
                 ],
               ),
@@ -239,33 +270,26 @@ class _OrderScreenState extends State<OrderScreen> {
               StyledButton(
                 onPressed: _navigateToCartView,
                 icon: Icons.shopping_cart,
-                label: 'View Cart (${cart.countOfItems} items)',
+                label: 'View Cart',
                 backgroundColor: Colors.blue,
               ),
               const SizedBox(height: 20),
-              Text(
-                'Total: £${cart.totalPrice.toStringAsFixed(2)}',
-                style: heading2,
-                textAlign: TextAlign.center,
+              StyledButton(
+                onPressed: _navigateToProfile,
+                icon: Icons.person,
+                label: 'Profile',
+                backgroundColor: Colors.purple,
               ),
-              const SizedBox(height: 30),
-
-              // Navigation to Sign In Screen
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AuthScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Sign In'),
-                ),
+              const SizedBox(height: 20),
+              Consumer<Cart>(
+                builder: (context, cart, child) {
+                  return Text(
+                    'Cart: ${cart.countOfItems} items - £${cart.totalPrice.toStringAsFixed(2)}',
+                    style: normalText,
+                    textAlign: TextAlign.center,
+                  );
+                },
               ),
-
               const SizedBox(height: 20),
             ],
           ),
