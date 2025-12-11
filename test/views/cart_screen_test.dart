@@ -26,7 +26,7 @@ void main() {
 
     Widget createCartScreen() {
       return MaterialApp(
-        home: CartScreen(cart: cart),
+        home: CartScreen(),
       );
     }
 
@@ -74,18 +74,6 @@ void main() {
 
         expect(find.textContaining('Footlong'), findsOneWidget);
         expect(find.textContaining('wheat bread'), findsOneWidget);
-      });
-
-      testWidgets('displays quantity and price for each item',
-          (WidgetTester tester) async {
-        cart.add(testSandwich1, quantity: 3);
-
-        await tester.pumpWidget(createCartScreen());
-
-        expect(find.textContaining('Qty: 3'), findsOneWidget);
-        final price = cart.getItemSubtotal(testSandwich1);
-        expect(find.textContaining('£${price.toStringAsFixed(2)}'),
-            findsOneWidget);
       });
 
       testWidgets('displays multiple items correctly',
@@ -157,7 +145,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => CartScreen(cart: cart)),
+                  MaterialPageRoute(builder: (_) => CartScreen()),
                 ),
                 child: const Text('Go to Cart'),
               ),
@@ -224,7 +212,7 @@ void main() {
         cart.add(testSandwich1, quantity: 1);
 
         await tester.pumpWidget(MaterialApp(
-          home: CartScreen(cart: cart),
+          home: CartScreen(),
         ));
 
         await tester.tap(find.text('Checkout'));

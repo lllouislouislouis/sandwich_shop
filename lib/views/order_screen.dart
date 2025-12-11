@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:sandwich_shop/views/app_styles.dart';
 import 'package:sandwich_shop/views/cart_screen.dart';
 import 'package:sandwich_shop/views/auth_screen.dart';
-import 'package:sandwich_shop/widgets/app_scaffold.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 
@@ -45,7 +44,7 @@ class _OrderScreenState extends State<OrderScreen> {
         await Navigator.push<Map<String, String>>(
       context,
       MaterialPageRoute<Map<String, String>>(
-        builder: (BuildContext context) => const ProfileScreen(),
+        builder: (BuildContext context) => const AuthScreen(),
       ),
     );
 
