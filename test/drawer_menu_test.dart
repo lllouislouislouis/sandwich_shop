@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sandwich_shop/main.dart';
 import 'package:sandwich_shop/views/order_screen.dart';
-import 'package:sandwich_shop/views/about_screen.dart';
 import 'package:sandwich_shop/views/auth_screen.dart';
-import 'package:sandwich_shop/views/checkout_screen.dart';
 import 'package:sandwich_shop/views/cart_screen.dart';
 
 void main() {
