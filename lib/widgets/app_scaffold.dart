@@ -98,28 +98,28 @@ class AppScaffold extends StatelessWidget {
             // Order Menu Item
             ListTile(
               leading: const Icon(Icons.restaurant_menu, color: Colors.orange),
-              title: const Text('Order', style: normalText),
+              title: Text('Order', style: normalText),
               onTap: () => _handleNavigation(context, '/'),
             ),
 
             // Checkout Menu Item
             ListTile(
               leading: const Icon(Icons.shopping_cart, color: Colors.orange),
-              title: const Text('Checkout', style: normalText),
+              title: Text('Checkout', style: normalText),
               onTap: () => _handleNavigation(context, '/checkout'),
             ),
 
             // Sign In Menu Item
             ListTile(
               leading: const Icon(Icons.login, color: Colors.orange),
-              title: const Text('Sign In', style: normalText),
+              title: Text('Sign In', style: normalText),
               onTap: () => _handleNavigation(context, '/auth'),
             ),
 
             // About Us Menu Item
             ListTile(
               leading: const Icon(Icons.info, color: Colors.orange),
-              title: const Text('About Us', style: normalText),
+              title: Text('About Us', style: normalText),
               onTap: () => _handleNavigation(context, '/about'),
             ),
           ],

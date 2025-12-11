@@ -124,7 +124,7 @@ class _AuthScreenState extends State<AuthScreen> {
             child: Image.asset('assets/images/logo.png'),
           ),
         ),
-        title: const Text(
+        title: Text(
           'Sign In',
           style: heading1,
         ),
@@ -151,7 +151,7 @@ class _AuthScreenState extends State<AuthScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Please sign in:', style: heading2),
+            Text('Please sign in:', style: heading2),
             const SizedBox(height: 20),
             TextField(
               controller: _usernameController,
