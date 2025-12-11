@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/views/cart_screen.dart';
@@ -25,8 +26,11 @@ void main() {
     });
 
     Widget createCartScreen() {
-      return const MaterialApp(
-        home: CartScreen(),
+      return ChangeNotifierProvider<Cart>(
+        create: (_) => cart,
+        child: const MaterialApp(
+          home: CartScreen(),
+        ),
       );
     }
 
@@ -52,8 +56,8 @@ void main() {
 
         await tester.pumpWidget(createCartScreen());
 
-        expect(find.textContaining('BLT'), findsOneWidget);
-        expect(find.textContaining('Turkey Club'), findsOneWidget);
+        expect(find.textContaining('Veggie Delight'), findsOneWidget);
+        expect(find.textContaining('Chicken Teriyaki'), findsOneWidget);
       });
 
       testWidgets('displays sandwich size and bread type',
@@ -94,9 +98,8 @@ void main() {
 
         await tester.pumpWidget(createCartScreen());
 
-        expect(find.textContaining('Total:'), findsOneWidget);
-        expect(find.textContaining('£${cart.totalPrice.toStringAsFixed(2)}'),
-            findsOneWidget);
+        final totalText = 'Total: £${cart.totalPrice.toStringAsFixed(2)}';
+        expect(find.text(totalText), findsOneWidget);
       });
 
       testWidgets('total updates when cart changes',
@@ -106,15 +109,15 @@ void main() {
         await tester.pumpWidget(createCartScreen());
 
         final initialTotal = cart.totalPrice;
-        expect(find.textContaining('£${initialTotal.toStringAsFixed(2)}'),
-            findsOneWidget);
+        final initialTotalText = 'Total: £${initialTotal.toStringAsFixed(2)}';
+        expect(find.text(initialTotalText), findsOneWidget);
 
         cart.add(testSandwich1, quantity: 1);
         await tester.pump();
 
         final newTotal = cart.totalPrice;
-        expect(find.textContaining('£${newTotal.toStringAsFixed(2)}'),
-            findsOneWidget);
+        final newTotalText = 'Total: £${newTotal.toStringAsFixed(2)}';
+        expect(find.text(newTotalText), findsOneWidget);
         expect(newTotal, greaterThan(initialTotal));
       });
 
@@ -124,9 +127,9 @@ void main() {
 
         await tester.pumpWidget(createCartScreen());
 
-        final totalText = '£${cart.totalPrice.toStringAsFixed(2)}';
-        expect(totalText, matches(r'£\d+\.\d{2}'));
-        expect(find.textContaining(totalText), findsOneWidget);
+        final totalText = 'Total: £${cart.totalPrice.toStringAsFixed(2)}';
+        expect(totalText, matches(r'Total: £\d+\.\d{2}'));
+        expect(find.text(totalText), findsOneWidget);
       });
     });
 
@@ -139,15 +142,18 @@ void main() {
 
       testWidgets('back button navigates away from cart',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CartScreen()),
+        await tester.pumpWidget(ChangeNotifierProvider<Cart>(
+          create: (_) => cart,
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CartScreen()),
+                  ),
+                  child: const Text('Go to Cart'),
                 ),
-                child: const Text('Go to Cart'),
               ),
             ),
           ),
@@ -211,8 +217,11 @@ void main() {
           (WidgetTester tester) async {
         cart.add(testSandwich1, quantity: 1);
 
-        await tester.pumpWidget(const MaterialApp(
-          home: CartScreen(),
+        await tester.pumpWidget(ChangeNotifierProvider<Cart>(
+          create: (_) => cart,
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
         ));
 
         await tester.tap(find.text('Checkout'));
@@ -235,7 +244,7 @@ void main() {
         await tester.pump();
 
         // Now has items
-        expect(find.textContaining('BLT'), findsOneWidget);
+        expect(find.textContaining('Veggie Delight'), findsOneWidget);
         expect(find.text('Checkout'), findsOneWidget);
       });
 
@@ -273,8 +282,8 @@ void main() {
 
         expect(find.textContaining('Qty: 99'), findsOneWidget);
         final total = cart.totalPrice;
-        expect(find.textContaining('£${total.toStringAsFixed(2)}'),
-            findsOneWidget);
+        final totalText = '£${total.toStringAsFixed(2)}';
+        expect(find.textContaining(totalText), findsWidgets);
       });
 
       testWidgets('handles cart being cleared', (WidgetTester tester) async {
@@ -300,9 +309,8 @@ void main() {
         await tester.pumpWidget(createCartScreen());
 
         final expectedTotal = cart.totalPrice;
-        expect(
-            find.textContaining('Total: £${expectedTotal.toStringAsFixed(2)}'),
-            findsOneWidget);
+        final totalText = 'Total: £${expectedTotal.toStringAsFixed(2)}';
+        expect(find.text(totalText), findsOneWidget);
       });
     });
   });

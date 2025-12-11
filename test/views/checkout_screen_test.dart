@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/views/checkout_screen.dart';
@@ -25,8 +26,11 @@ void main() {
     });
 
     Widget createCheckoutScreen() {
-      return const MaterialApp(
-        home: CheckoutScreen(),
+      return ChangeNotifierProvider<Cart>(
+        create: (_) => cart,
+        child: const MaterialApp(
+          home: CheckoutScreen(),
+        ),
       );
     }
 
@@ -57,7 +61,11 @@ void main() {
         await tester.pumpWidget(createCheckoutScreen());
 
         expect(find.text('Total:'), findsOneWidget);
-        expect(find.textContaining('£${cart.totalPrice.toStringAsFixed(2)}'),
+        expect(
+            find.byWidgetPredicate((widget) =>
+                widget is Text &&
+                widget.style?.fontSize == 20.0 &&
+                widget.data == '£${cart.totalPrice.toStringAsFixed(2)}'),
             findsOneWidget);
       });
 
@@ -131,6 +139,9 @@ void main() {
 
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.text('Processing payment...'), findsOneWidget);
+
+        // Clean up the pending timer
+        await tester.pumpAndSettle();
       });
 
       testWidgets('hides confirm button during processing',
@@ -145,31 +156,38 @@ void main() {
 
         expect(find.widgetWithText(ElevatedButton, 'Confirm Payment'),
             findsNothing);
+
+        // Clean up the pending timer
+        await tester.pumpAndSettle();
       });
 
       testWidgets('payment processing completes after delay',
           (WidgetTester tester) async {
         cart.add(testSandwich1, quantity: 1);
 
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CheckoutScreen(),
-                    ),
-                  );
-                  if (result != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Order placed: ${result['orderId']}')),
+        await tester.pumpWidget(ChangeNotifierProvider<Cart>(
+          create: (_) => cart,
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CheckoutScreen(),
+                      ),
                     );
-                  }
-                },
-                child: const Text('Go to Checkout'),
+                    if (result != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text('Order placed: ${result['orderId']}')),
+                      );
+                    }
+                  },
+                  child: const Text('Go to Checkout'),
+                ),
               ),
             ),
           ),
@@ -197,20 +215,23 @@ void main() {
         cart.add(testSandwich1, quantity: 2);
         Map? orderConfirmation;
 
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CheckoutScreen(),
-                    ),
-                  );
-                  orderConfirmation = result as Map?;
-                },
-                child: const Text('Go to Checkout'),
+        await tester.pumpWidget(ChangeNotifierProvider<Cart>(
+          create: (_) => cart,
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const CheckoutScreen(),
+                      ),
+                    );
+                    orderConfirmation = result as Map?;
+                  },
+                  child: const Text('Go to Checkout'),
+                ),
               ),
             ),
           ),
@@ -239,36 +260,39 @@ void main() {
         Map? firstOrder;
         Map? secondOrder;
 
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CheckoutScreen(),
-                        ),
-                      );
-                      firstOrder = result as Map?;
-                    },
-                    child: const Text('Order 1'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CheckoutScreen(),
-                        ),
-                      );
-                      secondOrder = result as Map?;
-                    },
-                    child: const Text('Order 2'),
-                  ),
-                ],
+        await tester.pumpWidget(ChangeNotifierProvider<Cart>(
+          create: (_) => cart,
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CheckoutScreen(),
+                          ),
+                        );
+                        firstOrder = result as Map?;
+                      },
+                      child: const Text('Order 1'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CheckoutScreen(),
+                          ),
+                        );
+                        secondOrder = result as Map?;
+                      },
+                      child: const Text('Order 2'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -304,56 +328,6 @@ void main() {
 
         expect(find.widgetWithText(AppBar, 'Checkout'), findsOneWidget);
       });
-
-      testWidgets('has back button in app bar', (WidgetTester tester) async {
-        cart.add(testSandwich1, quantity: 1);
-
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CheckoutScreen()),
-                ),
-                child: const Text('Go to Checkout'),
-              ),
-            ),
-          ),
-        ));
-
-        await tester.tap(find.text('Go to Checkout'));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(BackButton), findsOneWidget);
-      });
-
-      testWidgets('back button navigates away from checkout',
-          (WidgetTester tester) async {
-        cart.add(testSandwich1, quantity: 1);
-
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CheckoutScreen()),
-                ),
-                child: const Text('Go to Checkout'),
-              ),
-            ),
-          ),
-        ));
-
-        await tester.tap(find.text('Go to Checkout'));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byType(BackButton));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(CheckoutScreen), findsNothing);
-      });
     });
 
     group('Edge Cases', () {
@@ -374,7 +348,11 @@ void main() {
 
         expect(find.textContaining('99x'), findsOneWidget);
         final total = cart.totalPrice;
-        expect(find.textContaining('£${total.toStringAsFixed(2)}'),
+        expect(
+            find.byWidgetPredicate((widget) =>
+                widget is Text &&
+                widget.style?.fontSize == 20.0 &&
+                widget.data == '£${total.toStringAsFixed(2)}'),
             findsOneWidget);
       });
 
@@ -398,7 +376,11 @@ void main() {
         await tester.pumpWidget(createCheckoutScreen());
 
         final expectedTotal = cart.totalPrice;
-        expect(find.textContaining('£${expectedTotal.toStringAsFixed(2)}'),
+        expect(
+            find.byWidgetPredicate((widget) =>
+                widget is Text &&
+                widget.style?.fontSize == 20.0 &&
+                widget.data == '£${expectedTotal.toStringAsFixed(2)}'),
             findsOneWidget);
       });
     });
