@@ -96,11 +96,19 @@ class _AuthScreenState extends State<AuthScreen> {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Welcome, ${_usernameController.text}!',
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Welcome, ${_usernameController.text}! Sign-in successful.',
+                ),
+              ),
+            ],
           ),
           backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
         ),
       );
 
@@ -117,6 +125,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.orange,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: SizedBox(
@@ -133,13 +142,15 @@ class _AuthScreenState extends State<AuthScreen> {
             builder: (context, cart, child) {
               return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.shopping_cart),
-                    const SizedBox(width: 4),
-                    Text('${cart.countOfItems}'),
-                  ],
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.shopping_cart),
+                      const SizedBox(width: 4),
+                      Text('${cart.countOfItems}'),
+                    ],
+                  ),
                 ),
               );
             },
@@ -151,21 +162,45 @@ class _AuthScreenState extends State<AuthScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // App title and icon
+            Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                const Icon(Icons.restaurant_menu, size: 32, color: Colors.orange),
+                const SizedBox(width: 8),
+                Text('Sandwich Shop', style: heading1),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Subtitle
+            Center(
+              child: Text(
+                'Sign in to start ordering',
+                style: heading2,
+              ),
+            ),
+            const SizedBox(height: 30),
             Text('Please sign in:', style: heading2),
             const SizedBox(height: 20),
+            // Username field
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: 'Username',
+                hintText: 'Enter your username',
+                prefixIcon: const Icon(Icons.person),
                 border: const OutlineInputBorder(),
                 errorText: _usernameError,
               ),
             ),
             const SizedBox(height: 16),
+            // Password field
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
+                hintText: 'Enter your password',
+                prefixIcon: const Icon(Icons.lock),
                 border: const OutlineInputBorder(),
                 errorText: _passwordError,
               ),
@@ -174,6 +209,9 @@ class _AuthScreenState extends State<AuthScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _handleSignIn,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
               child: const Text('Sign In'),
             ),
           ],
