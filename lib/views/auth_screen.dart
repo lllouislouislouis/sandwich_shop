@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sandwich_shop/widgets/app_scaffold.dart';
 import '../views/app_styles.dart';
+import 'package:provider/provider.dart';
+import 'package:sandwich_shop/models/cart.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -112,101 +114,68 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffold(
-      title: 'Sign In',
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // App Logo or Icon
-                const Icon(
-                  Icons.lock_outline,
-                  size: 80,
-                  color: Colors.orange,
-                ),
-                const SizedBox(height: 32),
-
-                // Welcome Text
-                const Text(
-                  'Welcome Back!',
-                  style: heading1,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Sign in to continue',
-                  style: normalText,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-
-                // Username Field
-                TextField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: normalText,
-                    errorText: _usernameError,
-                    prefixIcon: const Icon(Icons.person),
-                    border: const OutlineInputBorder(),
-                  ),
-                  style: normalText,
-                ),
-                const SizedBox(height: 16),
-
-                // Password Field
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: normalText,
-                    errorText: _passwordError,
-                    prefixIcon: const Icon(Icons.lock),
-                    border: const OutlineInputBorder(),
-                  ),
-                  style: normalText,
-                ),
-                const SizedBox(height: 24),
-
-                // Sign In Button
-                ElevatedButton(
-                  onPressed: _handleSignIn,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    textStyle: heading2,
-                  ),
-                  child: const Text('Sign In'),
-                ),
-                const SizedBox(height: 16),
-
-                // Register Link (placeholder)
-                TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Registration coming soon!'),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Don\'t have an account? Register',
-                    style: normalText,
-                  ),
-                ),
-              ],
-            ),
-          ),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      leading: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+          height: 100,
+          child: Image.asset('assets/images/logo.png'),
         ),
       ),
-    );
-  }
+      title: const Text(
+        'Profile',
+        style: heading1,
+      ),
+      actions: [
+        Consumer<Cart>(
+          builder: (context, cart, child) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.shopping_cart),
+                  const SizedBox(width: 4),
+                  Text('${cart.countOfItems}'),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
+    ),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Enter your details:', style: heading2),
+          const SizedBox(height: 20),
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              labelText: 'Your Name',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _locationController,
+            decoration: const InputDecoration(
+              labelText: 'Preferred Location',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _saveProfile,
+            child: const Text('Save Profile'),
+          ),
+        ],
+      ),
+    ),
+  );
 }

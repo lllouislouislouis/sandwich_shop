@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sandwich_shop/views/app_styles.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/repositories/pricing_repository.dart';
-import 'package:sandwich_shop/widgets/app_scaffold.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final Cart cart;
-
-  const CheckoutScreen({super.key, required this.cart});
+  const CheckoutScreen({super.key});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -22,54 +20,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _isProcessing = true;
     });
 
-    // A fake delay to simulate payment processing
     await Future.delayed(const Duration(seconds: 2));
 
     final DateTime currentTime = DateTime.now();
     final int timestamp = currentTime.millisecondsSinceEpoch;
     final String orderId = 'ORD$timestamp';
 
+    final Cart cart = Provider.of<Cart>(context, listen: false);
     final Map orderConfirmation = {
       'orderId': orderId,
-      'timestamp': currentTime.toString(),
-      'items': widget.cart.countOfItems,
-      'total': widget.cart.totalPrice,
+      'totalAmount': cart.totalPrice,
+      'itemCount': cart.countOfItems,
+      'estimatedTime': '15-20 minutes',
     };
 
-    // Check if this State object is being shown in the widget tree
     if (mounted) {
-      setState(() {
-        _isProcessing = false;
-      });
-
-      // Show confirmation dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Order Confirmed!'),
-            content: Text(
-              'Order ID: ${orderConfirmation['orderId']}\n'
-              'Items: ${orderConfirmation['items']}\n'
-              'Total: £${orderConfirmation['total'].toStringAsFixed(2)}\n\n'
-              'Thank you for your order!',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.of(context)
-                      .pushReplacementNamed('/'); // Return to order screen
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-
-      // Clear the cart after successful order
-      widget.cart.clear();
+      Navigator.pop(context, orderConfirmation);
     }
   }
 
@@ -81,105 +47,118 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> columnChildren = [];
-
-    columnChildren.add(const Text('Order Summary', style: heading2));
-    columnChildren.add(const SizedBox(height: 20));
-
-    for (MapEntry<Sandwich, int> entry in widget.cart.items.entries) {
-      final Sandwich sandwich = entry.key;
-      final int quantity = entry.value;
-      final double itemPrice = _calculateItemPrice(sandwich, quantity);
-
-      final Widget itemCard = Card(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                sandwich.name,
-                style: heading2.copyWith(fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Size: ${sandwich.isFootlong ? 'Footlong' : '6"'}',
-                style: normalText,
-              ),
-              Text(
-                'Bread: ${sandwich.breadType.name}',
-                style: normalText,
-              ),
-              Text(
-                'Quantity: $quantity',
-                style: normalText,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Price: £${itemPrice.toStringAsFixed(2)}',
-                style: heading2.copyWith(fontSize: 16),
-              ),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            height: 100,
+            child: Image.asset('assets/images/logo.png'),
           ),
         ),
-      );
-      columnChildren.add(itemCard);
-    }
-
-    columnChildren.add(const Divider());
-    columnChildren.add(const SizedBox(height: 10));
-
-    final Widget totalRow = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text('Total:', style: heading2),
-        Text(
-          '£${widget.cart.totalPrice.toStringAsFixed(2)}',
-          style: heading2.copyWith(color: Colors.green),
-        ),
-      ],
-    );
-    columnChildren.add(totalRow);
-    columnChildren.add(const SizedBox(height: 40));
-
-    final Widget checkoutButton = ElevatedButton(
-      onPressed: _isProcessing ? null : _processPayment,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        textStyle: heading2,
-      ),
-      child: _isProcessing
-          ? const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
+        title: const Text('Checkout', style: heading1),
+        actions: [
+          Consumer<Cart>(
+            builder: (context, cart, child) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.shopping_cart),
+                    const SizedBox(width: 4),
+                    Text('${cart.countOfItems}'),
+                  ],
                 ),
-                SizedBox(width: 12),
-                Text('Processing...'),
-              ],
-            )
-          : const Text('Complete Payment'),
-    );
-    columnChildren.add(checkoutButton);
-
-    return AppScaffold(
-      title: 'Checkout',
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: columnChildren,
+              );
+            },
           ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Consumer<Cart>(
+          builder: (context, cart, child) {
+            List<Widget> columnChildren = [];
+
+            columnChildren.add(const Text('Order Summary', style: heading2));
+            columnChildren.add(const SizedBox(height: 20));
+
+            for (MapEntry<Sandwich, int> entry in cart.items.entries) {
+              final Sandwich sandwich = entry.key;
+              final int quantity = entry.value;
+              final double itemPrice = _calculateItemPrice(sandwich, quantity);
+
+              final Widget itemRow = Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${quantity}x ${sandwich.name}',
+                    style: normalText,
+                  ),
+                  Text(
+                    '£${itemPrice.toStringAsFixed(2)}',
+                    style: normalText,
+                  ),
+                ],
+              );
+
+              columnChildren.add(itemRow);
+              columnChildren.add(const SizedBox(height: 8));
+            }
+
+            columnChildren.add(const Divider());
+            columnChildren.add(const SizedBox(height: 10));
+
+            final Widget totalRow = Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Total:', style: heading2),
+                Text(
+                  '£${cart.totalPrice.toStringAsFixed(2)}',
+                  style: heading2,
+                ),
+              ],
+            );
+            columnChildren.add(totalRow);
+            columnChildren.add(const SizedBox(height: 40));
+
+            columnChildren.add(
+              const Text(
+                'Payment Method: Card ending in 1234',
+                style: normalText,
+                textAlign: TextAlign.center,
+              ),
+            );
+            columnChildren.add(const SizedBox(height: 20));
+
+            if (_isProcessing) {
+              columnChildren.add(
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+              columnChildren.add(const SizedBox(height: 20));
+              columnChildren.add(
+                const Text(
+                  'Processing payment...',
+                  style: normalText,
+                  textAlign: TextAlign.center,
+                ),
+              );
+            } else {
+              columnChildren.add(
+                ElevatedButton(
+                  onPressed: _processPayment,
+                  child: const Text('Confirm Payment', style: normalText),
+                ),
+              );
+            }
+
+            return Column(
+              children: columnChildren,
+            );
+          },
         ),
       ),
     );
