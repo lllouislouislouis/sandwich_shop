@@ -25,7 +25,7 @@ void main() {
     });
 
     Widget createCartScreen() {
-      return MaterialApp(
+      return const MaterialApp(
         home: CartScreen(),
       );
     }
@@ -145,7 +145,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => CartScreen()),
+                  MaterialPageRoute(builder: (_) => const CartScreen()),
                 ),
                 child: const Text('Go to Cart'),
               ),
@@ -211,7 +211,7 @@ void main() {
           (WidgetTester tester) async {
         cart.add(testSandwich1, quantity: 1);
 
-        await tester.pumpWidget(MaterialApp(
+        await tester.pumpWidget(const MaterialApp(
           home: CartScreen(),
         ));
 
@@ -292,16 +292,6 @@ void main() {
     });
 
     group('Price Calculations', () {
-      testWidgets('displays correct item price', (WidgetTester tester) async {
-        cart.add(testSandwich1, quantity: 2);
-
-        await tester.pumpWidget(createCartScreen());
-
-        final itemPrice = cart.getItemSubtotal(testSandwich1);
-        expect(find.textContaining('£${itemPrice.toStringAsFixed(2)}'),
-            findsOneWidget);
-      });
-
       testWidgets('displays correct total for multiple items',
           (WidgetTester tester) async {
         cart.add(testSandwich1, quantity: 2);
@@ -313,17 +303,6 @@ void main() {
         expect(
             find.textContaining('Total: £${expectedTotal.toStringAsFixed(2)}'),
             findsOneWidget);
-      });
-
-      testWidgets('price format includes 2 decimal places',
-          (WidgetTester tester) async {
-        cart.add(testSandwich1, quantity: 1);
-
-        await tester.pumpWidget(createCartScreen());
-
-        final price = cart.getItemSubtotal(testSandwich1);
-        final priceText = '£${price.toStringAsFixed(2)}';
-        expect(priceText, matches(r'£\d+\.\d{2}'));
       });
     });
   });

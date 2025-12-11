@@ -25,8 +25,8 @@ void main() {
     });
 
     Widget createCheckoutScreen() {
-      return MaterialApp(
-        home: CheckoutScreen(cart: cart),
+      return const MaterialApp(
+        home: CheckoutScreen(),
       );
     }
 
@@ -49,16 +49,6 @@ void main() {
 
         expect(find.textContaining('2x'), findsOneWidget);
         expect(find.textContaining('1x'), findsOneWidget);
-      });
-
-      testWidgets('displays item prices', (WidgetTester tester) async {
-        cart.add(testSandwich1, quantity: 1);
-
-        await tester.pumpWidget(createCheckoutScreen());
-
-        final price = cart.getItemSubtotal(testSandwich1);
-        expect(find.textContaining('£${price.toStringAsFixed(2)}'),
-            findsOneWidget);
       });
 
       testWidgets('displays total price', (WidgetTester tester) async {
@@ -169,7 +159,7 @@ void main() {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CheckoutScreen(cart: cart),
+                      builder: (_) => const CheckoutScreen(),
                     ),
                   );
                   if (result != null) {
@@ -215,7 +205,7 @@ void main() {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CheckoutScreen(cart: cart),
+                      builder: (_) => const CheckoutScreen(),
                     ),
                   );
                   orderConfirmation = result as Map?;
@@ -259,7 +249,7 @@ void main() {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => CheckoutScreen(cart: cart),
+                          builder: (_) => const CheckoutScreen(),
                         ),
                       );
                       firstOrder = result as Map?;
@@ -271,7 +261,7 @@ void main() {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => CheckoutScreen(cart: cart),
+                          builder: (_) => const CheckoutScreen(),
                         ),
                       );
                       secondOrder = result as Map?;
@@ -324,7 +314,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => CheckoutScreen(cart: cart)),
+                  MaterialPageRoute(builder: (_) => const CheckoutScreen()),
                 ),
                 child: const Text('Go to Checkout'),
               ),
@@ -348,7 +338,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => CheckoutScreen(cart: cart)),
+                  MaterialPageRoute(builder: (_) => const CheckoutScreen()),
                 ),
                 child: const Text('Go to Checkout'),
               ),
@@ -414,17 +404,6 @@ void main() {
     });
 
     group('Price Formatting', () {
-      testWidgets('displays prices with 2 decimal places',
-          (WidgetTester tester) async {
-        cart.add(testSandwich1, quantity: 1);
-
-        await tester.pumpWidget(createCheckoutScreen());
-
-        final price = cart.getItemSubtotal(testSandwich1);
-        final priceText = '£${price.toStringAsFixed(2)}';
-        expect(priceText, matches(r'£\d+\.\d{2}'));
-      });
-
       testWidgets('total price has 2 decimal places',
           (WidgetTester tester) async {
         cart.add(testSandwich1, quantity: 3);

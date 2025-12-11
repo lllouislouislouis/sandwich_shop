@@ -16,6 +16,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isProcessing = false;
 
   Future<void> _processPayment() async {
+    final Cart cart = Provider.of<Cart>(context, listen: false);
+
     setState(() {
       _isProcessing = true;
     });
@@ -26,7 +28,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final int timestamp = currentTime.millisecondsSinceEpoch;
     final String orderId = 'ORD$timestamp';
 
-    final Cart cart = Provider.of<Cart>(context, listen: false);
     final Map orderConfirmation = {
       'orderId': orderId,
       'totalAmount': cart.totalPrice,
