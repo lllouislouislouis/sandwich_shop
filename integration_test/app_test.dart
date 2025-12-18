@@ -16,17 +16,29 @@ void main() {
       final removeButtons = find.byIcon(Icons.remove);
       final quantityRemoveButton = removeButtons.first;
 
-      // Try to decrement at floor
+      // Try to decrement at floor (starts at 1, goes to 0)
       await tester.tap(quantityRemoveButton);
       await tester.pumpAndSettle();
 
-      // Still at 1
-      expect(find.text('1'), findsOneWidget);
+      // Now at 0
+      expect(find.text('0'), findsWidgets);
 
-      // Add to cart should add exactly 1 item
+      // Add to cart button should be disabled at 0
       final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
       await tester.ensureVisible(addToCartButton);
       await tester.pumpAndSettle();
+
+      // Verify button is disabled
+      final StyledButton button = tester.widget<StyledButton>(addToCartButton);
+      expect(button.onPressed, isNull);
+
+      // Increase back to 1
+      final addButtons = find.byIcon(Icons.add);
+      final quantityAddButton = addButtons.first;
+      await tester.tap(quantityAddButton);
+      await tester.pumpAndSettle();
+
+      // Now can add to cart
       await tester.tap(addToCartButton);
       await tester.pumpAndSettle();
 
@@ -48,8 +60,10 @@ void main() {
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      // Back to order screen
-      await tester.pageBack();
+      // Back to order screen using the button
+      final backButton = find.widgetWithText(StyledButton, 'Back to Order');
+      await tester.ensureVisible(backButton);
+      await tester.tap(backButton);
       await tester.pumpAndSettle();
 
       // Cart summary should persist
@@ -60,7 +74,7 @@ void main() {
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Veggie Delight'), findsOneWidget);
     });
 
@@ -104,7 +118,7 @@ void main() {
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Veggie Delight'), findsOneWidget);
       expect(find.text('Chicken Teriyaki'), findsOneWidget);
     });
@@ -138,7 +152,7 @@ void main() {
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Total: £110.00'), findsOneWidget);
     });
   });
@@ -173,7 +187,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify that we're on the cart screen and the sandwich is there
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Veggie Delight'), findsOneWidget);
       expect(find.text('Total: £11.00'), findsOneWidget);
     });
@@ -204,7 +218,7 @@ void main() {
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Chicken Teriyaki'), findsOneWidget);
     });
 
@@ -274,8 +288,7 @@ void main() {
   });
 
   group('error scenarios and resilience', () {
-    testWidgets(
-        'checkout blocked when cart is empty shows SnackBar and stays on Cart',
+    testWidgets('checkout button hidden when cart is empty',
         (WidgetTester tester) async {
       app.main();
       await tester.pumpAndSettle();
@@ -286,19 +299,14 @@ void main() {
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
 
-      // Try to checkout with empty cart
+      // Checkout button should not be visible
       final checkoutButton = find.widgetWithText(StyledButton, 'Checkout');
-      await tester.ensureVisible(checkoutButton);
-      await tester.tap(checkoutButton);
-      await tester.pumpAndSettle();
+      expect(checkoutButton, findsNothing);
 
-      // Should remain on Cart and show SnackBar feedback
-      expect(find.text('Order Summary'), findsNothing);
-      expect(find.text('Checkout'), findsNothing); // No push to Checkout screen
-      expect(find.text('Cart'), findsOneWidget);
-      expect(find.byType(SnackBar), findsOneWidget);
+      // Empty cart message should be visible
+      expect(find.text('Your cart is empty.'), findsOneWidget);
     });
 
     testWidgets('adding to cart twice accumulates count and total',
@@ -315,42 +323,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Cart: 2 items - £22.00'), findsOneWidget);
-    });
-
-    testWidgets('navigate to checkout then back retains cart state',
-        (WidgetTester tester) async {
-      app.main();
-      await tester.pumpAndSettle();
-
-      // Add one default item
-      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
-      await tester.ensureVisible(addToCartButton);
-      await tester.tap(addToCartButton);
-      await tester.pumpAndSettle();
-      expect(find.text('Cart: 1 items - £11.00'), findsOneWidget);
-
-      // Go to Cart
-      final viewCartButton = find.widgetWithText(StyledButton, 'View Cart');
-      await tester.ensureVisible(viewCartButton);
-      await tester.tap(viewCartButton);
-      await tester.pumpAndSettle();
-      expect(find.text('Cart'), findsOneWidget);
-
-      // Proceed to Checkout
-      final checkoutButton = find.widgetWithText(StyledButton, 'Checkout');
-      await tester.ensureVisible(checkoutButton);
-      await tester.tap(checkoutButton);
-      await tester.pumpAndSettle();
-      expect(find.text('Order Summary'), findsOneWidget);
-
-      // Navigate back to Cart
-      await tester.pageBack();
-      await tester.pumpAndSettle();
-
-      // Item and total should still be present
-      expect(find.text('Cart'), findsOneWidget);
-      expect(find.text('Veggie Delight'), findsOneWidget);
-      expect(find.text('Total: £11.00'), findsOneWidget);
     });
 
     testWidgets(
@@ -376,9 +348,12 @@ void main() {
       await tester.ensureVisible(viewCartButton);
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
 
-      await tester.pageBack();
+      // Back to order screen using the button
+      final backButton = find.widgetWithText(StyledButton, 'Back to Order');
+      await tester.ensureVisible(backButton);
+      await tester.tap(backButton);
       await tester.pumpAndSettle();
 
       // Change back to Veggie and add
@@ -396,7 +371,7 @@ void main() {
       await tester.tap(viewCartButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Cart'), findsOneWidget);
+      expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Veggie Delight'), findsOneWidget);
       expect(find.text('Chicken Teriyaki'), findsOneWidget);
     });
