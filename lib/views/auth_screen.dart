@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../views/app_styles.dart';
-import 'package:sandwich_shop/views/common_widgets.dart';
+import 'package:sandwich_shop/widgets/common_widgets.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
